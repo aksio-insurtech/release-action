@@ -19,19 +19,67 @@ the property of `should-publish` with `false`.
 
 It runs the following steps:
 
-| Name | Description |
-| Context | Establishes the context by looking at the GitHub context in which the action is running in. Decides if this is a publishable build. |
-| Increment Version | Increments the version by looking at the latest version tag of the repository and increases according to what the context decided the build type was. |
-| Changelog | Prepends to the CHANGELOG.md file in the repository with the content of the description. |
-| GitHub release | Releases a snapshot of the source code to GitHub releases with the calculated version number. |
+* Establishes the context by looking at the GitHub context in which the action is running in. Decides if this is a publishable build.
+* Increments the version by looking at the latest version tag of the repository and increases according to what the context decided the build type was.
+* Prepends to the CHANGELOG.md file in the repository with the content of the description.
+* Releases a snapshot of the source code to GitHub releases with the calculated version number.
 
 ## Usage
 
+Below is an example of use with a .NET 6 pipeline:
+
+```yml
+name: Publish
+
+env:
+  NUGET_OUTPUT: ./Artifacts/NuGet
+
+on:
+  pull_request:
+    types: [closed]  
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup .Net
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.100-preview.7.21379.14'
+      - name: Build .NET
+        run: dotnet build --configuration Release
+
+      - name: Release
+        id: release
+        uses: aksio-system/release-action@v1
+        with:
+          user-name: 'Aksio Build'
+          user-email: 'build@aksio.no'
+
+      - name: Remove any existing artifacts
+        run: rm -rf ${{ env.NUGET_OUTPUT }}
+
+      - name: Create NuGet packages
+        if: ${{ steps.release.outputs.should-publish == 'true' }}
+        run: dotnet pack --no-build --configuration Release -o ${{ env.NUGET_OUTPUT }} -p:PackageVersion=${{ steps.release.outputs.version }} -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg
+
+      - name: Push NuGet packages
+        if: ${{ steps.release.outputs.should-publish == 'true' }}
+        run: dotnet nuget push --skip-duplicate '${{ env.NUGET_OUTPUT }}/*.nupkg' --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+```
+
 ## Inputs
 
-| Property | Description | Default value |
-| -------- | ----------- | ------------- |
-| prerelease-branches | A comma separated list of prerelease identifier suffixes to branch names that when merged a PR to will trigger a prerelease. | '' |
+| Property | Description | Default value | Required |
+| -------- | ----------- | ------------- | -------- |
+| path | Relative path in repository to the changelog. | CHANGELOG.md | - |
+| user-name | UserName to use for any Git actions, such as commit of the changelog | | X |
+| user-email | Email to associate with the UserName for any Git actions, such as commit of the changelog | | X |
+| github-token | The GitHub token to use for any GitHub actions | ${{ secrets.GITHUB_TOKEN }} | - |
 
 ## Outputs
 
