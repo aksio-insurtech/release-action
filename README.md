@@ -74,8 +74,8 @@ jobs:
 
 ## Inputs
 
-| Property | Description | Default value | Required |
-| -------- | ----------- | ------------- | -------- |
+| Property | Description | Default value | Required |
+| -------- | ----------- | ------------- | -------- |
 | path | Relative path in repository to the changelog. | CHANGELOG.md | - |
 | user-name | UserName to use for any Git actions, such as commit of the changelog | | X |
 | user-email | Email to associate with the UserName for any Git actions, such as commit of the changelog | | X |
