@@ -31188,7 +31188,7 @@ var core = __nccwpck_require__(2186);
 const path = (0,core.getInput)('path') || 'CHANGELOG.md';
 const userName = (0,core.getInput)('user-name', { required: true }) || '';
 const userEmail = (0,core.getInput)('user-email', { required: true }) || '';
-const gitHubToken = (0,core.getInput)('GITHUB_TOKEN') || null;
+const gitHubToken = (0,core.getInput)('github-token') || null;
 /* harmony default export */ const inputs = ({
     path,
     userName,
