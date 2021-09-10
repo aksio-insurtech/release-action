@@ -1,0 +1,40 @@
+{
+  "name": "release-action",
+  "version": "1.0.0",
+  "description": "",
+  "author": "Aksio",
+  "main": "dist/index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "ncc build ./Source/index.ts",
+    "start": "ts-node ./Source/index.ts",
+    "clean": "tsc -b --clean",
+    "lint": "eslint '**/*.{js,ts,tsx}' --quiet --fix",
+    "lint:ci": "eslint '**/*.{js,ts,tsx}' --quiet",
+    "ci": "yarn clean && yarn lint:ci && yarn build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "@types/node": "^16.9.1",
+    "@types/semver": "^7.3.8",
+    "@typescript-eslint/eslint-plugin": "4.27.0",
+    "@typescript-eslint/parser": "4.27.0",
+    "@vercel/ncc": "^0.31.0",
+    "eslint": "7.29.0",
+    "eslint-config-prettier": "8.3.0",
+    "eslint-plugin-import": "2.23.4",
+    "eslint-plugin-no-null": "1.0.2",
+    "eslint-plugin-prettier": "3.4.0",
+    "eslint-plugin-react": "7.24.0",
+    "semver": "^7.3.5",
+    "typescript": "^4.4.2"
+  },
+  "dependencies": {
+    "@actions/core": "^1.5.0",
+    "@actions/github": "^5.0.0",
+    "@octokit/rest": "^18.10.0",
+    "tag-cmp": "^1.0.1",
+    "ts-node": "^10.2.1",
+    "winston": "^3.3.3"
+  }
+}
