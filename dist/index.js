@@ -12792,7 +12792,7 @@ module.exports = format((info, opts = {}) => {
 
 
 const format = __nccwpck_require__(3791);
-const ms = __nccwpck_require__(9992);
+const ms = __nccwpck_require__(900);
 
 /*
  * function ms (info)
@@ -15336,7 +15336,7 @@ function coerce (version, options) {
 
 /***/ }),
 
-/***/ 9992:
+/***/ 900:
 /***/ ((module) => {
 
 /**
@@ -21925,7 +21925,7 @@ module.exports = gte
 
 /***/ }),
 
-/***/ 900:
+/***/ 929:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 const SemVer = __nccwpck_require__(8088)
@@ -22060,7 +22060,7 @@ module.exports = prerelease
 
 /***/ }),
 
-/***/ 6417:
+/***/ 7499:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 const compare = __nccwpck_require__(4309)
@@ -22136,14 +22136,14 @@ module.exports = {
   parse: __nccwpck_require__(5925),
   valid: __nccwpck_require__(9601),
   clean: __nccwpck_require__(8848),
-  inc: __nccwpck_require__(900),
+  inc: __nccwpck_require__(929),
   diff: __nccwpck_require__(4297),
   major: __nccwpck_require__(6688),
   minor: __nccwpck_require__(8447),
   patch: __nccwpck_require__(2866),
   prerelease: __nccwpck_require__(6014),
   compare: __nccwpck_require__(4309),
-  rcompare: __nccwpck_require__(6417),
+  rcompare: __nccwpck_require__(7499),
   compareLoose: __nccwpck_require__(2804),
   compareBuild: __nccwpck_require__(2156),
   sort: __nccwpck_require__(1426),
@@ -24348,7 +24348,7 @@ module.exports = bytesToUuid;
 // Unique ID creation requires a high quality random # generator.  In node.js
 // this is pretty straight-forward - we use the crypto API.
 
-var crypto = __nccwpck_require__(3373);
+var crypto = __nccwpck_require__(6417);
 
 module.exports = function nodeRNG() {
   return crypto.randomBytes(16);
@@ -30897,7 +30897,7 @@ module.exports = require("constants");
 
 /***/ }),
 
-/***/ 3373:
+/***/ 6417:
 /***/ ((module) => {
 
 "use strict";
@@ -31114,9 +31114,6 @@ __nccwpck_require__.r(__webpack_exports__);
 var github = __nccwpck_require__(5438);
 // EXTERNAL MODULE: ./node_modules/@octokit/rest/dist-node/index.js
 var dist_node = __nccwpck_require__(5375);
-// EXTERNAL MODULE: ./node_modules/semver/index.js
-var semver = __nccwpck_require__(1383);
-var semver_default = /*#__PURE__*/__nccwpck_require__.n(semver);
 // EXTERNAL MODULE: ./node_modules/winston/lib/winston.js
 var winston = __nccwpck_require__(4158);
 ;// CONCATENATED MODULE: ./Source/logging.ts
@@ -31132,49 +31129,6 @@ const loggerOptions = {
 };
 const logger = (0,winston.createLogger)(loggerOptions);
 
-
-// EXTERNAL MODULE: ./node_modules/tag-cmp/tags.js
-var tag_cmp_tags = __nccwpck_require__(1710);
-;// CONCATENATED MODULE: ./Source/tags.ts
-
-// Based on : https://github.com/oprypin/find-latest-tag
-async function getLatestTag(octokit, owner, repo, releasesOnly, prefix, regex, sortTags) {
-    const endpoint = (releasesOnly ? octokit.repos.listReleases : octokit.repos.listTags);
-    const pages = endpoint.endpoint.merge({ "owner": owner, "repo": repo, "per_page": 100 });
-    const tags = [];
-    for await (const item of getItemsFromPages(octokit, pages)) {
-        const tag = (releasesOnly ? item["tag_name"] : item["name"]);
-        if (!tag.startsWith(prefix)) {
-            continue;
-        }
-        if (regex && !new RegExp(regex).test(tag)) {
-            continue;
-        }
-        if (!sortTags) {
-            // Assume that the API returns the most recent tag(s) first.
-            return tag;
-        }
-        tags.push(tag);
-    }
-    if (tags.length === 0) {
-        let error = `The repository "${owner}/${repo}" has no `;
-        error += releasesOnly ? "releases" : "tags";
-        if (prefix) {
-            error += ` matching "${prefix}*"`;
-        }
-        throw error;
-    }
-    tags.sort(tag_cmp_tags/* cmpTags */.U);
-    const [latestTag] = tags.slice(-1);
-    return latestTag;
-}
-async function* getItemsFromPages(octokit, pages) {
-    for await (const page of octokit.paginate.iterator(pages)) {
-        for (const item of page.data) {
-            yield item;
-        }
-    }
-}
 
 // EXTERNAL MODULE: external "path"
 var external_path_ = __nccwpck_require__(5622);
@@ -31251,8 +31205,92 @@ async function pushChanges() {
     }
 });
 
-;// CONCATENATED MODULE: ./Source/index.ts
+// EXTERNAL MODULE: ./node_modules/semver/index.js
+var semver = __nccwpck_require__(1383);
+var semver_default = /*#__PURE__*/__nccwpck_require__.n(semver);
+// EXTERNAL MODULE: ./node_modules/tag-cmp/tags.js
+var tag_cmp_tags = __nccwpck_require__(1710);
+;// CONCATENATED MODULE: ./Source/tags.ts
 
+// Based on : https://github.com/oprypin/find-latest-tag
+async function getLatestTag(octokit, owner, repo, releasesOnly, prefix, regex, sortTags) {
+    const endpoint = (releasesOnly ? octokit.repos.listReleases : octokit.repos.listTags);
+    const pages = endpoint.endpoint.merge({ "owner": owner, "repo": repo, "per_page": 100 });
+    const tags = [];
+    for await (const item of getItemsFromPages(octokit, pages)) {
+        const tag = (releasesOnly ? item["tag_name"] : item["name"]);
+        if (!tag.startsWith(prefix)) {
+            continue;
+        }
+        if (regex && !new RegExp(regex).test(tag)) {
+            continue;
+        }
+        if (!sortTags) {
+            // Assume that the API returns the most recent tag(s) first.
+            return tag;
+        }
+        tags.push(tag);
+    }
+    if (tags.length === 0) {
+        let error = `The repository "${owner}/${repo}" has no `;
+        error += releasesOnly ? "releases" : "tags";
+        if (prefix) {
+            error += ` matching "${prefix}*"`;
+        }
+        throw error;
+    }
+    tags.sort(tag_cmp_tags/* cmpTags */.U);
+    const [latestTag] = tags.slice(-1);
+    return latestTag;
+}
+async function* getItemsFromPages(octokit, pages) {
+    for await (const page of octokit.paginate.iterator(pages)) {
+        for (const item of page.data) {
+            yield item;
+        }
+    }
+}
+
+;// CONCATENATED MODULE: ./Source/version.ts
+
+
+
+
+async function getNextVersion(octokit, pullRequest) {
+    let isMinor = false;
+    let isPatch = false;
+    const isMajor = pullRequest.labels.find(_ => _.name === 'major');
+    if (!isMajor) {
+        isMinor = pullRequest.labels.some(_ => _.name === 'minor');
+        if (!isMinor) {
+            isPatch = pullRequest.labels.some(_ => _.name === 'patch');
+        }
+    }
+    if (!isMinor && !isMinor && !isPatch) {
+        logger.info('No release related labels associated with the PR.');
+        return;
+    }
+    let latestTag = await getLatestTag(octokit, github.context.repo.owner, github.context.repo.repo, true, 'v', '', true);
+    if (latestTag.toLowerCase().startsWith('v')) {
+        latestTag = latestTag.substr(1);
+    }
+    logger.info(`Latest tag: ${latestTag}`);
+    let version = semver_default().parse(latestTag);
+    if (!version) {
+        logger.error(`Version string '${latestTag}' is not in a valid format`);
+        return;
+    }
+    if (isMajor)
+        version = version.inc('major') || version;
+    if (isMinor)
+        version = version.inc('minor') || version;
+    if (isPatch)
+        version = version.inc('patch') || version;
+    logger.info(`New version is '${version.version}''`);
+    return version;
+}
+
+;// CONCATENATED MODULE: ./Source/index.ts
 
 
 
@@ -31264,57 +31302,30 @@ const octokit = new dist_node/* Octokit */.v({ auth: inputs.gitHubToken });
 run();
 async function run() {
     try {
-        const mergedPr = await getMergedPr(github.context.repo.owner, github.context.repo.repo, github.context.sha);
-        if (!mergedPr) {
+        const pullRequest = await getMergedPullRequest(github.context.repo.owner, github.context.repo.repo, github.context.sha);
+        if (!pullRequest) {
             logger.error('No merged PR found.');
             return;
         }
-        if (mergedPr.labels.length === 0) {
+        if (!pullRequest.labels || pullRequest.labels.length === 0) {
             logger.info('No release labels found.');
             outputs.setShouldPublish(false);
             return;
         }
-        let isMinor = false;
-        let isPatch = false;
-        const isMajor = mergedPr.labels.find(_ => _.name === 'major');
-        if (!isMajor) {
-            isMinor = mergedPr.labels.some(_ => _.name === 'minor');
-            if (!isMinor) {
-                isPatch = mergedPr.labels.some(_ => _.name === 'patch');
-            }
-        }
-        if (!isMinor && !isMinor && !isPatch) {
-            logger.info('No release related labels associated with the PR.');
+        const version = await getNextVersion(octokit, pullRequest);
+        if (!version)
             return;
-        }
-        let latestTag = await getLatestTag(octokit, github.context.repo.owner, github.context.repo.repo, true, 'v', '', true);
-        if (latestTag.toLowerCase().startsWith('v')) {
-            latestTag = latestTag.substr(1);
-        }
-        logger.info(`Latest tag: ${latestTag}`);
-        let version = semver_default().parse(latestTag);
-        if (!version) {
-            logger.error(`Version string '${latestTag}' is not in a valid format`);
-            return;
-        }
-        if (isMajor)
-            version = version.inc('major') || version;
-        if (isMinor)
-            version = version.inc('minor') || version;
-        if (isPatch)
-            version = version.inc('patch') || version;
-        logger.info(`New version is '${version.version}''`);
         await octokit.repos.createRelease({
             owner: github.context.repo.owner,
             repo: github.context.repo.repo,
             tag_name: `v${version.version}`,
             name: `Release v${version.version}`,
-            body: mergedPr.body || '',
+            body: pullRequest.body || '',
             prerelease: false,
             target_commitish: github.context.sha
         });
         logger.info('GitHub release created');
-        await prependToChangeLog(mergedPr.body || '', `v${version.version}`, mergedPr.number, mergedPr.url);
+        await prependToChangeLog(pullRequest.body || '', `v${version.version}`, pullRequest.number, pullRequest.url);
         logger.info('Prepended to changelog');
         outputs.setVersion(version.version);
         outputs.setShouldPublish(true);
@@ -31323,10 +31334,10 @@ async function run() {
         logger.error("Something went wrong", ex);
     }
 }
-async function getMergedPr(owner, repo, sha) {
+async function getMergedPullRequest(owner, repo, sha) {
     logger.debug(`Getting merged pull request for: '${sha}''`);
-    const mergedPr = await octokit.paginate(octokit.pulls.list, { owner, repo, state: 'closed', sort: 'updated', direction: 'desc' }).then(data => data.find(pr => pr.merge_commit_sha === sha));
-    return mergedPr;
+    const mergedPullRequest = await octokit.paginate(octokit.pulls.list, { owner, repo, state: 'closed', sort: 'updated', direction: 'desc' }).then(data => data.find(pr => pr.merge_commit_sha === sha));
+    return mergedPullRequest;
 }
 
 })();

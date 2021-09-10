@@ -18,7 +18,6 @@ module.exports = {
     ],
     plugins: [
         '@typescript-eslint',
-        'header',
         'no-null',
         'import'
     ],
