@@ -16893,7 +16893,7 @@ function cmpTags(a, b) {
     return cmpArrays(tagSortKey(a), tagSortKey(b));
 }
 
-exports.cmpTags = cmpTags;
+exports.U = cmpTags;
 
 function tagSortKey(s) {
     let a = s.split(/([0-9]+)/);
@@ -23643,7 +23643,7 @@ async function getLatestTag(octokit, owner, repo, releasesOnly, prefix, regex, s
         }
         throw error;
     }
-    tags.sort(tag_cmp_tags);
+    tags.sort(tag_cmp_tags/* cmpTags */.U);
     const [latestTag] = tags.slice(-1);
     return latestTag;
 }

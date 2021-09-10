@@ -1,5 +1,5 @@
 import { Octokit } from '@octokit/rest';
-import tagCmp from 'tag-cmp';
+import { cmpTags } from 'tag-cmp';
 
 // Based on : https://github.com/oprypin/find-latest-tag
 
@@ -30,7 +30,7 @@ export async function getLatestTag(octokit: Octokit, owner: string, repo: string
         }
         throw error;
     }
-    tags.sort(tagCmp);
+    tags.sort(cmpTags);
     const [latestTag] = tags.slice(-1);
     return latestTag;
 }
