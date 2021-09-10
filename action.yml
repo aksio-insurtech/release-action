@@ -1,5 +1,10 @@
 name: "Release"
 description: "Calculates a new version number based on PR labels. Creates a changelog entry based on content of PR description. Packages the repository up and puts GitHub release."
+inputs:
+  prerelease-branches:
+    description: "A comma separated list of prerelease identifier suffixes to branch names that when merged a PR to will trigger a prerelease. default: ''"
+    required: false
+    default: ""
 outputs:
   should-publish:
     description: "Whether or not a publish should be done"
@@ -14,7 +19,7 @@ runs:
         id: context
         uses: dolittle/establish-context-action@v2 
         with:
-          prerelease-branches: ${{ env.PRERELEASE_BRANCHES }}
+          prerelease-branches: ${{ inputs.prerelease-branches }}
 
       - name: Increment version
         id: increment-version

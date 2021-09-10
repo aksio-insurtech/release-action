@@ -24,6 +24,12 @@ It runs the following steps:
 
 ## Usage
 
+## Inputs
+
+| Property | Description | Default value |
+| -------- | ----------- | ------------- |
+| prerelease-branches | A comma separated list of prerelease identifier suffixes to branch names that when merged a PR to will trigger a prerelease. | '' |
+
 ## Outputs
 
 | Property | Description |
