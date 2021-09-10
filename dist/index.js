@@ -31206,9 +31206,8 @@ var prepend_file_default = /*#__PURE__*/__nccwpck_require__.n(prepend_file);
 
 
 
-async function prependToChangeLog(body, version, pullRequestUrl) {
+async function prependToChangeLog(body, version, pullRequestNumber, pullRequestUrl) {
     const date = new Date(new Date().toUTCString());
-    const pullRequestNumber = pullRequestUrl.slice(pullRequestUrl.indexOf('pull/')).match(/\d+$/);
     const heading = `# [${version}] - ${date.getUTCFullYear()}-${date.getUTCMonth() + 1}-${date.getUTCDate()} [PR: #${pullRequestNumber}](${pullRequestUrl})`;
     const combined = `${heading}\n${body}\n\n`;
     await prepend_file_default()(inputs.path, combined);
@@ -31315,7 +31314,7 @@ async function run() {
             target_commitish: github.context.sha
         });
         logger.info('GitHub release created');
-        await prependToChangeLog(mergedPr.body || '', `v${version.version}`, mergedPr.url);
+        await prependToChangeLog(mergedPr.body || '', `v${version.version}`, mergedPr.number, mergedPr.url);
         logger.info('Prepended to changelog');
         outputs.setVersion(version.version);
         outputs.setShouldPublish(true);

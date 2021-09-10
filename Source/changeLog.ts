@@ -5,9 +5,8 @@ import inputs from './inputs';
 import prependFile from 'prepend-file';
 import { context } from '@actions/github';
 
-export async function prependToChangeLog(body: string, version: string, pullRequestUrl: string): Promise<void> {
+export async function prependToChangeLog(body: string, version: string, pullRequestNumber: number, pullRequestUrl: string): Promise<void> {
     const date = new Date(new Date().toUTCString());
-    const pullRequestNumber = pullRequestUrl.slice(pullRequestUrl.indexOf('pull/')).match(/\d+$/);
     const heading = `# [${version}] - ${date.getUTCFullYear()}-${date.getUTCMonth() + 1}-${date.getUTCDate()} [PR: #${pullRequestNumber}](${pullRequestUrl})`;
     const combined = `${heading}\n${body}\n\n`;
     await prependFile(inputs.path, combined);

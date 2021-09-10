@@ -74,9 +74,11 @@ async function run() {
             target_commitish: context.sha
         });
 
+        
+
         logger.info('GitHub release created');
 
-        await prependToChangeLog(mergedPr.body || '', `v${version.version}`, mergedPr.url);
+        await prependToChangeLog(mergedPr.body || '', `v${version.version}`, mergedPr.number, mergedPr.url);
 
         logger.info('Prepended to changelog');
 
