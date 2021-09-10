@@ -1,0 +1,43 @@
+name: "Release"
+description: "Calculates a new version number based on PR labels. Creates a changelog entry based on content of PR description. Packages the repository up and puts GitHub release."
+outputs:
+  should-publish:
+    description: "Whether or not a publish should be done"
+    value: ${{ steps.context.outputs.should-publish }}
+  version:
+    description: " Version number to publish with"
+    value: ${{ steps.increment-version.outputs.next-version }}
+runs:
+  using: "composite"
+  steps:
+      - name: Establish context
+        id: context
+        uses: dolittle/establish-context-action@v2 
+        with:
+          prerelease-branches: ${{ env.PRERELEASE_BRANCHES }}
+
+      - name: Increment version
+        id: increment-version
+        if: ${{ steps.context.outputs.should-publish == 'true' }}
+        uses: dolittle/increment-version-action@v2
+        with:
+          version: ${{ steps.context.outputs.current-version }}
+          release-type: ${{ steps.context.outputs.release-type }}        
+
+      - name: Prepend to Changelog
+        if: ${{ steps.context.outputs.should-publish == 'true' }}
+        uses: dolittle/add-to-changelog-action@v2
+        with:
+          version: ${{ steps.increment-version.outputs.next-version }}
+          body: ${{ steps.context.outputs.pr-body }}
+          pr-url: ${{ steps.context.outputs.pr-url }}
+          changelog-path: CHANGELOG.md
+          user-email: build@aksio.no
+          user-name: aksio-build
+
+      - name: Create GitHub Release
+        if: ${{ steps.context.outputs.should-publish == 'true' }}
+        uses: dolittle/github-release-action@v2
+        with:
+          version: ${{ steps.increment-version.outputs.next-version }}
+          body: ${{ steps.context.outputs.pr-body }}      
