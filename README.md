@@ -14,6 +14,9 @@ one of the following labels adhering to [semantic versioning version 2](https://
 | Minor | New capabilities has been added |
 | Patch | Bug fixes |
 
+If none of these labels are present, it doesn't consider this to be a release and will not produce a GitHub release and returns
+the property of `should-publish` with `false`.
+
 It runs the following steps:
 
 | Name | Description |
