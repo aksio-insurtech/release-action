@@ -15,8 +15,9 @@ inputs:
     required: true
     default: ""
   github-token:
-    description: "GitHub token to use within the action when it is performing writing."
+    description: "GitHub token to use within the action when it is performing writing. Defaults to the ${{ secrets.GITHUB_TOKEN }}."
     required: false
+    default: ${{ github.token }}
 
 outputs:
   should-publish:
