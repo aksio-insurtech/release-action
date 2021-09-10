@@ -8,7 +8,7 @@ import { context } from '@actions/github';
 export async function prependToChangeLog(body: string, version: string, pullRequestNumber: number, pullRequestUrl: string): Promise<void> {
     const date = new Date(new Date().toUTCString());
     const heading = `# [${version}] - ${date.getUTCFullYear()}-${date.getUTCMonth() + 1}-${date.getUTCDate()} [PR: #${pullRequestNumber}](${pullRequestUrl})`;
-    const combined = `${heading}\n${body}\n\n`;
+    const combined = `${heading}\n\n${body}\n\n`;
     await prependFile(inputs.path, combined);
     await configureUser();
     await commitChangelog(version);
