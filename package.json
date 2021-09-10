@@ -31,8 +31,10 @@
   },
   "dependencies": {
     "@actions/core": "^1.5.0",
+    "@actions/exec": "^1.1.0",
     "@actions/github": "^5.0.0",
     "@octokit/rest": "^18.10.0",
+    "prepend-file": "^2.0.0",
     "tag-cmp": "^1.0.1",
     "ts-node": "^10.2.1",
     "winston": "^3.3.3"

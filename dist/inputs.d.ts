@@ -1,4 +1,7 @@
 declare const _default: {
-    GitHubToken: string | null;
+    path: string;
+    userName: string;
+    userEmail: string;
+    gitHubToken: string | null;
 };
 export default _default;
