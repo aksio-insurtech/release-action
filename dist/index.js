@@ -31210,7 +31210,7 @@ async function prependToChangeLog(body, version, pullRequestUrl) {
     const date = new Date(new Date().toUTCString());
     const pullRequestNumber = pullRequestUrl.slice(pullRequestUrl.indexOf('pull/')).match(/\d+$/);
     const heading = `# [${version}] - ${date.getUTCFullYear()}-${date.getUTCMonth() + 1}-${date.getUTCDate()} [PR: #${pullRequestNumber}](${pullRequestUrl})`;
-    const combined = `${heading}\n${body}\n`;
+    const combined = `${heading}\n${body}\n\n`;
     await prepend_file_default()(inputs.path, combined);
     await configureUser();
     await commitChangelog(version);
