@@ -23675,7 +23675,7 @@ const token = (0,core.getInput)('GITHUB_TOKEN') || null;
 const octokit = new dist_node/* Octokit */.v({ auth: token });
 run();
 async function run() {
-    const latestVersion = getLatestTag(octokit, github.context.repo.owner, github.context.repo.repo, true, 'v', '', true);
+    const latestVersion = await getLatestTag(octokit, github.context.repo.owner, github.context.repo.repo, true, 'v', '', true);
     logger.info(`Latest version: ${latestVersion}`);
 }
 

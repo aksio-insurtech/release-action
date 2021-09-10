@@ -22,7 +22,7 @@ const octokit = new Octokit({ auth: token });
 
 run();
 async function run() {
-    const latestVersion = getLatestTag(
+    const latestVersion = await getLatestTag(
         octokit,
         context.repo.owner,
         context.repo.repo,
