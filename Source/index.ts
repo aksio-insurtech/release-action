@@ -59,9 +59,9 @@ async function run() {
         logger.error(`Version string '${latestTag}' is not in a valid format`);
         return;
     }
-    if (isMajor) version = version?.inc('major') || version;
-    if (isMinor) version = version?.inc('minor') || version;
-    if (isPatch) version = version?.inc('patch') || version;
+    if (isMajor) version = version.inc('major') || version;
+    if (isMinor) version = version.inc('minor') || version;
+    if (isPatch) version = version.inc('patch') || version;
 
     logger.info(`New version is '${version.version}''`);
 

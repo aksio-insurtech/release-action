@@ -31298,11 +31298,11 @@ async function run() {
         return;
     }
     if (isMajor)
-        version = version?.inc('major') || version;
+        version = version.inc('major') || version;
     if (isMinor)
-        version = version?.inc('minor') || version;
+        version = version.inc('minor') || version;
     if (isPatch)
-        version = version?.inc('patch') || version;
+        version = version.inc('patch') || version;
     logger.info(`New version is '${version.version}''`);
     await octokit.repos.createRelease({
         owner: github.context.repo.owner,
