@@ -25,11 +25,11 @@ async function run() {
 
     let isMinor = false;
     let isPatch = false;
-    const isMajor = mergedPr.labels.find(_ => _.name?.toLowerCase() === 'major');
+    const isMajor = mergedPr.labels.find(_ => _.name === 'major');
     if (!isMajor) {
-        isMinor = mergedPr.labels.some(_ => _.name?.toLowerCase() === 'minor');
+        isMinor = mergedPr.labels.some(_ => _.name === 'minor');
         if (!isMinor) {
-            isPatch = mergedPr.labels.some(_ => _.name?.toLowerCase() === 'patch');
+            isPatch = mergedPr.labels.some(_ => _.name === 'patch');
         }
     }
 
