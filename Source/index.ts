@@ -40,7 +40,7 @@ async function run() {
 
         logger.info('GitHub release created');
 
-        await prependToChangeLog(pullRequest.body || '', `v${version.version}`, pullRequest.number, pullRequest.url);
+        await prependToChangeLog(pullRequest.body || '', `v${version.version}`, pullRequest.number, pullRequest.html_url);
 
         logger.info('Prepended to changelog');
 
@@ -59,5 +59,6 @@ async function getMergedPullRequest(owner: string, repo: string, sha: string): P
         octokit.pulls.list,
         { owner, repo, state: 'closed', sort: 'updated', direction: 'desc' }
     ).then(data => data.find(pr => pr.merge_commit_sha === sha));
+
     return mergedPullRequest;
 }

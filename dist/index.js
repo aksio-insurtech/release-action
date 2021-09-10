@@ -31325,7 +31325,7 @@ async function run() {
             target_commitish: github.context.sha
         });
         logger.info('GitHub release created');
-        await prependToChangeLog(pullRequest.body || '', `v${version.version}`, pullRequest.number, pullRequest.url);
+        await prependToChangeLog(pullRequest.body || '', `v${version.version}`, pullRequest.number, pullRequest.html_url);
         logger.info('Prepended to changelog');
         outputs.setVersion(version.version);
         outputs.setShouldPublish(true);
