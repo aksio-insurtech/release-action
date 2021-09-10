@@ -31210,7 +31210,7 @@ async function prependToChangeLog(body, version, pullRequestUrl) {
     const date = new Date(new Date().toUTCString());
     const pullRequestNumber = pullRequestUrl.slice(pullRequestUrl.indexOf('pull/')).match(/\d+$/);
     const heading = `# [${version}] - ${date.getUTCFullYear()}-${date.getUTCMonth() + 1}-${date.getUTCDate()} [PR: #${pullRequestNumber}](${pullRequestUrl})`;
-    const combined = `${heading}\n${body}`;
+    const combined = `${heading}\n${body}`;
     await prepend_file_default()(inputs.path, combined);
     await configureUser();
     await commitChangelog(version);
@@ -31309,7 +31309,7 @@ async function run() {
             owner: github.context.repo.owner,
             repo: github.context.repo.repo,
             tag_name: `v${version.version}`,
-            name: mergedPr.title,
+            name: `Release v${version.version}`,
             body: mergedPr.body || '',
             prerelease: false,
             target_commitish: github.context.sha

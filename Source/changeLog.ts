@@ -9,7 +9,7 @@ export async function prependToChangeLog(body: string, version: string, pullRequ
     const date = new Date(new Date().toUTCString());
     const pullRequestNumber = pullRequestUrl.slice(pullRequestUrl.indexOf('pull/')).match(/\d+$/);
     const heading = `# [${version}] - ${date.getUTCFullYear()}-${date.getUTCMonth() + 1}-${date.getUTCDate()} [PR: #${pullRequestNumber}](${pullRequestUrl})`;
-    const combined = `${heading}\n${body}`;
+    const combined = `${heading}\n${body}`;
     await prependFile(inputs.path, combined);
     await configureUser();
     await commitChangelog(version);

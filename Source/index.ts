@@ -12,7 +12,6 @@ const octokit = new Octokit({ auth: inputs.gitHubToken });
 run();
 async function run() {
     try {
-
         const mergedPr = await getMergedPr(context.repo.owner, context.repo.repo, context.sha);
         if (!mergedPr) {
             logger.error('No merged PR found.');
@@ -54,7 +53,6 @@ async function run() {
 
         logger.info(`Latest tag: ${latestTag}`);
 
-
         let version = semver.parse(latestTag);
         if (!version) {
             logger.error(`Version string '${latestTag}' is not in a valid format`);
@@ -70,7 +68,7 @@ async function run() {
             owner: context.repo.owner,
             repo: context.repo.repo,
             tag_name: `v${version.version}`,
-            name: mergedPr.title,
+            name: `Release v${version.version}`,
             body: mergedPr.body || '',
             prerelease: false,
             target_commitish: context.sha
