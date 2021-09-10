@@ -28,7 +28,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.issue = exports.issueCommand = void 0;
 const os = __importStar(__nccwpck_require__(2087));
-const utils_1 = __nccwpck_require__(6321);
+const utils_1 = __nccwpck_require__(5278);
 /**
  * Commands
  *
@@ -137,7 +137,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getState = exports.saveState = exports.group = exports.endGroup = exports.startGroup = exports.info = exports.notice = exports.warning = exports.error = exports.debug = exports.isDebug = exports.setFailed = exports.setCommandEcho = exports.setOutput = exports.getBooleanInput = exports.getMultilineInput = exports.getInput = exports.addPath = exports.setSecret = exports.exportVariable = exports.ExitCode = void 0;
 const command_1 = __nccwpck_require__(7351);
 const file_command_1 = __nccwpck_require__(717);
-const utils_1 = __nccwpck_require__(6321);
+const utils_1 = __nccwpck_require__(5278);
 const os = __importStar(__nccwpck_require__(2087));
 const path = __importStar(__nccwpck_require__(5622));
 /**
@@ -443,7 +443,7 @@ exports.issueCommand = void 0;
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const fs = __importStar(__nccwpck_require__(5747));
 const os = __importStar(__nccwpck_require__(2087));
-const utils_1 = __nccwpck_require__(6321);
+const utils_1 = __nccwpck_require__(5278);
 function issueCommand(command, message) {
     const filePath = process.env[`GITHUB_${command}`];
     if (!filePath) {
@@ -461,7 +461,7 @@ exports.issueCommand = issueCommand;
 
 /***/ }),
 
-/***/ 6321:
+/***/ 5278:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -14711,7 +14711,7 @@ Writable.WritableState = WritableState;
 /*<replacement>*/
 
 var internalUtil = {
-  deprecate: __nccwpck_require__(5278)
+  deprecate: __nccwpck_require__(7127)
 };
 /*</replacement>*/
 
@@ -17501,7 +17501,7 @@ exports.getUserAgent = getUserAgent;
 
 /***/ }),
 
-/***/ 5278:
+/***/ 7127:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
@@ -19104,7 +19104,7 @@ util.inherits = __nccwpck_require__(4124);
 
 /*<replacement>*/
 var internalUtil = {
-  deprecate: __nccwpck_require__(5278)
+  deprecate: __nccwpck_require__(7127)
 };
 /*</replacement>*/
 
@@ -23604,10 +23604,6 @@ var __webpack_exports__ = {};
 // ESM COMPAT FLAG
 __nccwpck_require__.r(__webpack_exports__);
 
-// EXTERNAL MODULE: ./node_modules/winston/lib/winston.js
-var winston = __nccwpck_require__(4158);
-// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
-var core = __nccwpck_require__(2186);
 // EXTERNAL MODULE: ./node_modules/@actions/github/lib/github.js
 var github = __nccwpck_require__(5438);
 // EXTERNAL MODULE: ./node_modules/@octokit/rest/dist-node/index.js
@@ -23655,11 +23651,26 @@ async function* getItemsFromPages(octokit, pages) {
     }
 }
 
-;// CONCATENATED MODULE: ./Source/index.ts
+// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
+var core = __nccwpck_require__(2186);
+;// CONCATENATED MODULE: ./Source/outputs.ts
 
+/* harmony default export */ const outputs = ({
+    setShouldPublish(value) {
+        (0,core.setOutput)('should-publish', value);
+    }
+});
 
+;// CONCATENATED MODULE: ./Source/inputs.ts
 
+const GitHubToken = (0,core.getInput)('GITHUB_TOKEN') || null;
+/* harmony default export */ const inputs = ({
+    GitHubToken
+});
 
+// EXTERNAL MODULE: ./node_modules/winston/lib/winston.js
+var winston = __nccwpck_require__(4158);
+;// CONCATENATED MODULE: ./Source/logging.ts
 
 const loggerOptions = {
     level: 'info',
@@ -23671,12 +23682,35 @@ const loggerOptions = {
     ]
 };
 const logger = (0,winston.createLogger)(loggerOptions);
-const token = (0,core.getInput)('GITHUB_TOKEN') || null;
-const octokit = new dist_node/* Octokit */.v({ auth: token });
+
+
+;// CONCATENATED MODULE: ./Source/index.ts
+
+
+
+
+
+
+const octokit = new dist_node/* Octokit */.v({ auth: inputs.GitHubToken });
 run();
 async function run() {
+    const mergedPr = await getMergedPr(github.context.repo.owner, github.context.repo.repo, github.context.sha);
+    if (!mergedPr) {
+        logger.error('No merged PR found');
+        return;
+    }
+    if (mergedPr?.labels.length === 0) {
+        logger.info('No release labels found');
+        outputs.setShouldPublish(false);
+        return;
+    }
     const latestVersion = await getLatestTag(octokit, github.context.repo.owner, github.context.repo.repo, true, 'v', '', true);
     logger.info(`Latest version: ${latestVersion}`);
+}
+async function getMergedPr(owner, repo, sha) {
+    logger.debug(`Trying to get merged PR with merge_commit_sha: ${sha}`);
+    const mergedPr = await octokit.paginate(octokit.pulls.list, { owner, repo, state: 'closed', sort: 'updated', direction: 'desc' }).then(data => data.find(pr => pr.merge_commit_sha === sha));
+    return mergedPr;
 }
 
 })();
