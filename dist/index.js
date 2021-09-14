@@ -31324,7 +31324,9 @@ async function run() {
         if (!version)
             return;
         logger.info(`Create release for version '${version.version}'`);
-        await octokit.repos.createRelease({
+        // GitHub Create Release documentation: https://developer.github.com/v3/repos/releases/#create-a-release
+        // GitHub Octokit Create Release documentation: https://octokit.github.io/rest.js/v18#repos-create-release
+        const release = {
             owner: github.context.repo.owner,
             repo: github.context.repo.repo,
             tag_name: `v${version.version}`,
@@ -31332,7 +31334,10 @@ async function run() {
             body: pullRequest.body || '',
             prerelease: false,
             target_commitish: github.context.sha
-        });
+        };
+        logger.info('Release object:');
+        logger.info(release);
+        await octokit.repos.createRelease(release);
         logger.info('GitHub release created');
         await prependToChangeLog(pullRequest.body || '', `v${version.version}`, pullRequest.number, pullRequest.html_url);
         logger.info('Prepended to changelog');
@@ -31342,6 +31347,7 @@ async function run() {
     catch (ex) {
         logger.error("Something went wrong");
         logger.error(ex);
+        outputs.setShouldPublish(false);
     }
 }
 async function getMergedPullRequest(owner, repo, sha) {
