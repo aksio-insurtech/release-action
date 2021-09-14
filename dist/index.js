@@ -31323,6 +31323,7 @@ async function run() {
         const version = await getNextVersion(octokit, pullRequest);
         if (!version)
             return;
+        logger.info(`Create release for version '${version.version}'`);
         await octokit.repos.createRelease({
             owner: github.context.repo.owner,
             repo: github.context.repo.repo,
@@ -31339,7 +31340,8 @@ async function run() {
         outputs.setShouldPublish(true);
     }
     catch (ex) {
-        logger.error("Something went wrong", ex);
+        logger.error("Something went wrong");
+        logger.error(ex);
     }
 }
 async function getMergedPullRequest(owner, repo, sha) {
