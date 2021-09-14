@@ -31212,36 +31212,44 @@ var semver_default = /*#__PURE__*/__nccwpck_require__.n(semver);
 var tag_cmp_tags = __nccwpck_require__(1710);
 ;// CONCATENATED MODULE: ./Source/tags.ts
 
+
 // Based on : https://github.com/oprypin/find-latest-tag
 async function getLatestTag(octokit, owner, repo, releasesOnly, prefix, regex, sortTags) {
-    const endpoint = (releasesOnly ? octokit.repos.listReleases : octokit.repos.listTags);
-    const pages = endpoint.endpoint.merge({ "owner": owner, "repo": repo, "per_page": 100 });
-    const tags = [];
-    for await (const item of getItemsFromPages(octokit, pages)) {
-        const tag = (releasesOnly ? item["tag_name"] : item["name"]);
-        if (!tag.startsWith(prefix)) {
-            continue;
+    try {
+        const endpoint = (releasesOnly ? octokit.repos.listReleases : octokit.repos.listTags);
+        const pages = endpoint.endpoint.merge({ "owner": owner, "repo": repo, "per_page": 100 });
+        const tags = [];
+        for await (const item of getItemsFromPages(octokit, pages)) {
+            const tag = (releasesOnly ? item["tag_name"] : item["name"]);
+            if (!tag.startsWith(prefix)) {
+                continue;
+            }
+            if (regex && !new RegExp(regex).test(tag)) {
+                continue;
+            }
+            if (!sortTags) {
+                // Assume that the API returns the most recent tag(s) first.
+                return tag;
+            }
+            tags.push(tag);
         }
-        if (regex && !new RegExp(regex).test(tag)) {
-            continue;
+        if (tags.length === 0) {
+            let error = `The repository "${owner}/${repo}" has no `;
+            error += releasesOnly ? "releases" : "tags";
+            if (prefix) {
+                error += ` matching "${prefix}*"`;
+            }
+            throw error;
         }
-        if (!sortTags) {
-            // Assume that the API returns the most recent tag(s) first.
-            return tag;
-        }
-        tags.push(tag);
+        tags.sort(tag_cmp_tags/* cmpTags */.U);
+        const [latestTag] = tags.slice(-1);
+        return latestTag;
     }
-    if (tags.length === 0) {
-        let error = `The repository "${owner}/${repo}" has no `;
-        error += releasesOnly ? "releases" : "tags";
-        if (prefix) {
-            error += ` matching "${prefix}*"`;
-        }
-        throw error;
+    catch (ex) {
+        logger.error(`Couldn't get latest tag`);
+        logger.error(ex);
+        return '';
     }
-    tags.sort(tag_cmp_tags/* cmpTags */.U);
-    const [latestTag] = tags.slice(-1);
-    return latestTag;
 }
 async function* getItemsFromPages(octokit, pages) {
     for await (const page of octokit.paginate.iterator(pages)) {
@@ -31277,6 +31285,10 @@ async function getNextVersion(octokit, pullRequest) {
     let latestTag = await getLatestTag(octokit, github.context.repo.owner, github.context.repo.repo, true, 'v', '', true);
     if (latestTag.toLowerCase().startsWith('v')) {
         latestTag = latestTag.substr(1);
+    }
+    else {
+        latestTag = 'v0.0.0';
+        logger.info('No valid version found in tags - setting to v0.0.0');
     }
     logger.info(`Latest tag: ${latestTag}`);
     let version = semver_default().parse(latestTag);

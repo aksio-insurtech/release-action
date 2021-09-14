@@ -37,6 +37,9 @@ export async function getNextVersion(octokit: Octokit, pullRequest: PullRequest)
 
     if (latestTag.toLowerCase().startsWith('v')) {
         latestTag = latestTag.substr(1);
+    } else {
+        latestTag = 'v0.0.0';
+        logger.info('No valid version found in tags - setting to v0.0.0');
     }
 
     logger.info(`Latest tag: ${latestTag}`);
