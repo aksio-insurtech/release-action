@@ -31266,7 +31266,7 @@ async function getNextVersion(octokit, pullRequest) {
             isPatch = pullRequest.labels.some(_ => _.name === 'patch');
         }
     }
-    if (!isMinor && !isMinor && !isPatch) {
+    if (!isMajor && !isMinor && !isPatch) {
         logger.info('No release related labels associated with the PR.');
         if (pullRequest.labels.length > 0) {
             logger.info('Labels associated with PR:');
