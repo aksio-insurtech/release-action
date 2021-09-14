@@ -31268,6 +31268,10 @@ async function getNextVersion(octokit, pullRequest) {
     }
     if (!isMinor && !isMinor && !isPatch) {
         logger.info('No release related labels associated with the PR.');
+        if (pullRequest.labels.length > 0) {
+            logger.info('Labels associated with PR:');
+            pullRequest.labels.forEach(_ => logger.info(`  - ${_.name}`));
+        }
         return;
     }
     let latestTag = await getLatestTag(octokit, github.context.repo.owner, github.context.repo.repo, true, 'v', '', true);

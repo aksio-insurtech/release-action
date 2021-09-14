@@ -18,6 +18,11 @@ export async function getNextVersion(octokit: Octokit, pullRequest: PullRequest)
 
     if (!isMinor && !isMinor && !isPatch) {
         logger.info('No release related labels associated with the PR.');
+        if (pullRequest.labels.length > 0) {
+            logger.info('Labels associated with PR:');
+            pullRequest.labels.forEach(_ => logger.info(`  - ${_.name}`));
+        }
+
         return;
     }
 
