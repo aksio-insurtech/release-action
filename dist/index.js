@@ -31259,7 +31259,7 @@ async function* getItemsFromPages(octokit, pages) {
 async function getNextVersion(octokit, pullRequest) {
     let isMinor = false;
     let isPatch = false;
-    const isMajor = pullRequest.labels.find(_ => _.name === 'major');
+    const isMajor = pullRequest.labels.some(_ => _.name === 'major');
     if (!isMajor) {
         isMinor = pullRequest.labels.some(_ => _.name === 'minor');
         if (!isMinor) {

@@ -8,7 +8,7 @@ import { PullRequest } from './PullRequest';
 export async function getNextVersion(octokit: Octokit, pullRequest: PullRequest) {
     let isMinor = false;
     let isPatch = false;
-    const isMajor = pullRequest.labels.find(_ => _.name === 'major');
+    const isMajor = pullRequest.labels.some(_ => _.name === 'major');
     if (!isMajor) {
         isMinor = pullRequest.labels.some(_ => _.name === 'minor');
         if (!isMinor) {
