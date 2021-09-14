@@ -21,6 +21,10 @@ async function run() {
         }
         if (!pullRequest.labels || pullRequest.labels.length === 0) {
             logger.info('No release labels found.');
+            if (pullRequest.labels.length > 0) {
+                logger.info('Labels associated with PR:');
+                pullRequest.labels.forEach(_ => logger.info(`  - ${_}`));
+            }
             outputs.setShouldPublish(false);
             return;
         }
