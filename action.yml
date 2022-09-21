@@ -27,6 +27,6 @@ outputs:
 
 runs:
   using: "node16"
-  main: "dist/establishVersion.js"
-  post: 'dist/release.js'
+  main: "dist/HandleVersion/index.js"
+  post: 'dist/HandleRelease/index.js'
   post-if: 'success()'

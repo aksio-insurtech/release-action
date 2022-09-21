@@ -9,12 +9,12 @@
     "node": ">= 16"
   },
   "scripts": {
-    "build": "ncc build -o dist/establishVersion ./Source/establishVersion.ts && ncc build -o dist/release ./Source/release.ts",
+    "build": "ncc build -o dist/HandleVersion ./Source/HandleVersion.ts && ncc build -o dist/HandleRelease ./Source/HandleRelease.ts",
     "clean": "tsc -b --clean",
     "lint": "eslint 'Source/*.ts' --quiet --fix --cache",
     "lint:ci": "eslint 'Source/*.ts' --quiet",
     "ci": "yarn clean && yarn lint:ci && yarn build",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha",
     "up": "ncu -u"
   },
   "devDependencies": {
@@ -29,9 +29,15 @@
     "eslint-plugin-no-null": "1.0.2",
     "eslint-plugin-prettier": "4.2.1",
     "semver": "^7.3.7",
-    "typescript": "^4.8.3"
+    "typescript": "^4.8.3",
+    "reflect-metadata": "0.1.13"
   },
   "dependencies": {
+    "@types/chai": "4.3.3",
+    "@types/chai-as-promised": "7.1.5",
+    "@types/mocha": "9.1.1",
+    "@types/sinon": "10.0.13",
+    "@types/sinon-chai": "3.2.8",
     "@actions/core": "^1.9.1",
     "@actions/exec": "^1.1.1",
     "@actions/github": "^5.0.3",
@@ -39,6 +45,11 @@
     "prepend-file": "^2.0.1",
     "tag-cmp": "^1.0.1",
     "ts-node": "^10.9.1",
-    "winston": "^3.8.2"
+    "winston": "^3.8.2",
+    "mocha": "10.0.0",
+    "sinon": "14.0.0",
+    "sinon-chai": "3.7.0",
+    "chai": "4.3.6",
+    "chai-as-promised": "7.1.1"
   }
 }
