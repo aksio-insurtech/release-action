@@ -49,11 +49,7 @@ export class Versions implements IVersions {
 
         if (latestTag.toLowerCase().startsWith('v')) {
             latestTag = latestTag.substring(1);
-        } else {
-            latestTag = 'v0.0.0';
-            this._logger.info('No valid version found in tags - setting to v0.0.0');
         }
-
         this._logger.info(`Latest tag: ${latestTag}`);
 
         let version = semver.parse(latestTag);
@@ -61,11 +57,14 @@ export class Versions implements IVersions {
             this._logger.error(`Version string '${latestTag}' is not in a valid format`);
             return VersionInfo.invalid;
         }
+
         if (isMajor) version = version.inc('major') || version;
         if (isMinor) version = version.inc('minor') || version;
         if (isPatch) version = version.inc('patch') || version;
 
         this._logger.info(`New version is '${version.version}''`);
+
+        console.log(version.version);
 
         return new VersionInfo(version, isMajor, isMinor, isPatch, true, true);
     }

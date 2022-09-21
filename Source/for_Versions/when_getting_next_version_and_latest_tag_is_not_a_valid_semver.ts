@@ -4,11 +4,12 @@ import { PullRequest } from '../PullRequest';
 import fakeLogger from '../fakeLogger';
 import fakeContext from '../fakeContext';
 import { ITags } from '../ITags';
+import semver from 'semver';
 
-describe("when getting next version and latest tag has all parts set and there is patch label", async () => {
+describe("when getting next version and latest tag is not a valid semver", async () => {
     const fakeTags: ITags = {
         getLatestTag(releaseOnly: boolean, prefix: string, regex: string, sortTags): Promise<string> {
-            return new Promise((resolve) => resolve("v1.2.3"));
+            return new Promise((resolve) => resolve("gibberish"));
         }
     };
 
@@ -25,9 +26,6 @@ describe("when getting next version and latest tag has all parts set and there i
 
     const version = await versions.getNextVersionFor(pullRequest);
 
-    it('should set is release to true', () => version.isRelease.should.be.true);
-    it('should create a version with bumped patch', () => version.isPatch.should.be.true);
-    it('should create a version with setting is major to false', () => version.isMajor.should.be.false);
-    it('should create a version with setting is minor to false', () => version.isMinor.should.be.false);
-    it('should create a clean major version', () => version.version.version.should.equal('1.2.4'));
+    it('should set is release to false', () => version.isRelease.should.be.false);
+    it('should set is is valid to false', () => version.isValid.should.be.false);
 });
