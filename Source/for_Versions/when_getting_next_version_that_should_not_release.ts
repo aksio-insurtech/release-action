@@ -3,9 +3,16 @@ import sinon from 'sinon';
 import { PullRequest } from '../PullRequest';
 import fakeLogger from '../fakeLogger';
 import fakeContext from '../fakeContext';
+import { ITags } from '../ITags';
 
 describe("when getting next version that should not release", async () => {
-    const versions = new Versions(sinon.stub() as any, fakeContext, sinon.stub() as any, fakeLogger);
+    const fakeTags: ITags = {
+        getLatestTag(releaseOnly: boolean, prefix: string, regex: string, sortTags): Promise<string> {
+            return new Promise((resolve) => resolve("v1.0.0"));
+        }
+    };
+
+    const versions = new Versions(sinon.stub() as any, fakeContext, fakeTags, fakeLogger);
     const pullRequest: PullRequest = {
         labels: [],
         body: '',

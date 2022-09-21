@@ -21,6 +21,23 @@ export class Versions implements IVersions {
         // If the pull request has not been merged
         //    generate version number: <major>.<minor>.<patch>-PR<number>.<incremental number>
 
+        let latestTag = await this._tags.getLatestTag(
+            true,
+            'v',
+            '',
+            true);
+
+        if (latestTag.toLowerCase().startsWith('v')) {
+            latestTag = latestTag.substring(1);
+        }
+        this._logger.info(`Latest tag: ${latestTag}`);
+
+        let version = semver.parse(latestTag);
+        if (!version) {
+            this._logger.error(`Version string '${latestTag}' is not in a valid format`);
+            return VersionInfo.invalid;
+        }
+
         let isMinor = false;
         let isPatch = false;
         const isMajor = pullRequest.labels.some(_ => _.name === 'major');
@@ -39,23 +56,6 @@ export class Versions implements IVersions {
             }
 
             return VersionInfo.noRelease;
-        }
-
-        let latestTag = await this._tags.getLatestTag(
-            true,
-            'v',
-            '',
-            true);
-
-        if (latestTag.toLowerCase().startsWith('v')) {
-            latestTag = latestTag.substring(1);
-        }
-        this._logger.info(`Latest tag: ${latestTag}`);
-
-        let version = semver.parse(latestTag);
-        if (!version) {
-            this._logger.error(`Version string '${latestTag}' is not in a valid format`);
-            return VersionInfo.invalid;
         }
 
         if (isMajor) version = version.inc('major') || version;
