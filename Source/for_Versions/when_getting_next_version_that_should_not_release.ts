@@ -2,11 +2,12 @@ import { Versions } from '../Versions';
 import sinon from 'sinon';
 import { PullRequest } from '../PullRequest';
 import fakeLogger from '../fakeLogger';
+import fakeContext from '../fakeContext';
 
 
 describe("when getting next version that should not release", async () => {
 
-    const versions = new Versions(sinon.stub() as any, sinon.stub() as any, fakeLogger);
+    const versions = new Versions(sinon.stub() as any, fakeContext, sinon.stub() as any, fakeLogger);
     const pullRequest: PullRequest = {
         labels: [],
         body: '',

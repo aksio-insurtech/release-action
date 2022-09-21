@@ -1,3 +1,4 @@
+import { context } from '@actions/github';
 import { Octokit } from '@octokit/rest';
 
 import { logger } from './logging';
@@ -49,5 +50,5 @@ export class HandleVersion {
 }
 
 new HandleVersion(
-    new PullRequests(octokit, logger),
-    new Versions(octokit, new Tags(octokit, logger), logger)).run();
+    new PullRequests(octokit, context, logger),
+    new Versions(octokit, new Tags(octokit, context, logger), logger)).run();

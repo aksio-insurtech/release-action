@@ -1,17 +1,17 @@
-import { context } from '@actions/github';
+import { Context } from '@actions/github/lib/context';
+import { Octokit } from '@octokit/rest';
 import winston from 'winston';
 import { IPullRequests } from './IPullRequests';
 import { PullRequest } from './PullRequest';
-import { Octokit } from '@octokit/rest';
 
 export class PullRequests implements IPullRequests {
-    constructor(readonly _octokit: Octokit, readonly _logger: winston.Logger) {
+    constructor(readonly _octokit: Octokit, readonly _context: Context, readonly _logger: winston.Logger) {
     }
 
     async getMergedPullRequest(): Promise<PullRequest | undefined> {
-        const owner = context.repo.owner;
-        const repo = context.repo.repo;
-        const sha = context.sha;
+        const owner = this._context.repo.owner;
+        const repo = this._context.repo.repo;
+        const sha = this._context.sha;
 
         this._logger.debug(`Getting merged pull request for: '${sha}''`);
 

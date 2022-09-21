@@ -1,14 +1,15 @@
-import semver from 'semver';
-import { context } from '@actions/github';
-import { PullRequest } from './PullRequest';
+import { Context } from '@actions/github/lib/context';
 import { Octokit } from '@octokit/rest';
+import semver from 'semver';
+import winston from 'winston';
+
+import { PullRequest } from './PullRequest';
 import { IVersions } from './IVersions';
 import { VersionInfo } from './VersionInfo';
-import winston from 'winston';
 import { ITags } from './ITags';
 
 export class Versions implements IVersions {
-    constructor(readonly _octokit: Octokit, readonly _tags: ITags, readonly _logger: winston.Logger) {
+    constructor(readonly _octokit: Octokit, readonly _context: Context, readonly _tags: ITags, readonly _logger: winston.Logger) {
     }
 
     async getNextVersion(pullRequest: PullRequest): Promise<VersionInfo> {
@@ -34,8 +35,8 @@ export class Versions implements IVersions {
         }
 
         let latestTag = await this._tags.getLatestTag(
-            context.repo.owner,
-            context.repo.repo,
+            this._context.repo.owner,
+            this._context.repo.repo,
             true,
             'v',
             '',

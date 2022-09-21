@@ -3,10 +3,11 @@ import { cmpTags } from 'tag-cmp';
 import { logger } from './logging';
 import winston from 'winston';
 import { ITags } from './ITags';
+import { Context } from '@actions/github/lib/context';
 
 export class Tags implements ITags {
 
-    constructor(readonly _octokit: Octokit, readonly _logger: winston.Logger) {
+    constructor(readonly _octokit: Octokit, readonly _context: Context, readonly _logger: winston.Logger) {
     }
 
     async getLatestTag(owner: string, repo: string, releasesOnly: boolean, prefix: string, regex: string, sortTags: boolean): Promise<string> {

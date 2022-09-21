@@ -1,4 +1,5 @@
 import { context } from '@actions/github';
+import { Context } from '@actions/github/lib/context';
 import { Octokit } from '@octokit/rest';
 
 import { logger } from './logging';
@@ -14,7 +15,7 @@ const octokit = new Octokit({ auth: inputs.gitHubToken });
 
 export class HandleRelease {
 
-    constructor(readonly _pullRequests: IPullRequests, readonly _versions: IVersions) {
+    constructor(readonly _pullRequests: IPullRequests, readonly _context: Context, readonly _versions: IVersions) {
     }
 
     async run(): Promise<void> {
@@ -30,13 +31,13 @@ export class HandleRelease {
         // GitHub Octokit Create Release documentation: https://octokit.github.io/rest.js/v18#repos-create-release
 
         const release = {
-            owner: context.repo.owner,
-            repo: context.repo.repo,
+            owner: this._context.repo.owner,
+            repo: this._context.repo.repo,
             tag_name: `v${version.version}`,
             name: `Release v${version.version}`,
             body: pullRequest.body || '',
             prerelease: false,
-            target_commitish: context.sha
+            target_commitish: this._context.sha
         };
 
         logger.info('Release object:');
@@ -51,5 +52,6 @@ export class HandleRelease {
 }
 
 new HandleRelease(
-    new PullRequests(octokit, logger),
-    new Versions(octokit, new Tags(octokit, logger), logger)).run();
+    new PullRequests(octokit, context, logger),
+    context,
+    new Versions(octokit, new Tags(octokit, context, logger), logger)).run();
