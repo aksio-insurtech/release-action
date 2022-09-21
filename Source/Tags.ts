@@ -10,8 +10,11 @@ export class Tags implements ITags {
     constructor(readonly _octokit: Octokit, readonly _context: Context, readonly _logger: winston.Logger) {
     }
 
-    async getLatestTag(owner: string, repo: string, releasesOnly: boolean, prefix: string, regex: string, sortTags: boolean): Promise<string> {
+    async getLatestTag(releasesOnly: boolean, prefix: string, regex: string, sortTags: boolean): Promise<string> {
         try {
+            const owner = this._context.repo.owner;
+            const repo = this._context.repo.repo;
+
             const endpoint = (releasesOnly ? this._octokit.repos.listReleases : this._octokit.repos.listTags);
             const pages = endpoint.endpoint.merge({ "owner": owner, "repo": repo, "per_page": 100 });
 

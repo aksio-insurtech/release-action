@@ -7,12 +7,19 @@ import { PullRequest } from './PullRequest';
 import { IVersions } from './IVersions';
 import { VersionInfo } from './VersionInfo';
 import { ITags } from './ITags';
+import { Console } from 'console';
 
 export class Versions implements IVersions {
     constructor(readonly _octokit: Octokit, readonly _context: Context, readonly _tags: ITags, readonly _logger: winston.Logger) {
     }
 
     async getNextVersionFor(pullRequest: PullRequest): Promise<VersionInfo> {
+        // If the pull request points to a headRefName that is semantic version number
+        //    set base version to be the headRefName version number
+        // If the pull request is targeting a baseRefName that is a semantic version number
+        //    set base version to be the baseRefName version number
+        // If the pull request has not been merged
+        //    generate version number: <major>.<minor>.<patch>-PR<number>.<incremental number>
 
         let isMinor = false;
         let isPatch = false;
@@ -35,8 +42,6 @@ export class Versions implements IVersions {
         }
 
         let latestTag = await this._tags.getLatestTag(
-            this._context.repo.owner,
-            this._context.repo.repo,
             true,
             'v',
             '',
