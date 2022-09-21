@@ -3,5 +3,5 @@ import { VersionInfo } from "./VersionInfo";
 
 
 export interface IVersions {
-    getNextVersion(pullRequest: PullRequest): Promise<VersionInfo>;
+    getNextVersionFor(pullRequest: PullRequest): Promise<VersionInfo>;
 }

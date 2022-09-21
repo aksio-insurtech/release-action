@@ -22,7 +22,7 @@ export class HandleRelease {
         const pullRequest = await this._pullRequests.getMergedPullRequest();
         if (!pullRequest) return;
 
-        const version = await this._versions.getNextVersion(pullRequest);
+        const version = await this._versions.getNextVersionFor(pullRequest);
         if (!version) return;
 
         logger.info(`Create release for version '${version.version}'`);

@@ -12,7 +12,7 @@ export class Versions implements IVersions {
     constructor(readonly _octokit: Octokit, readonly _context: Context, readonly _tags: ITags, readonly _logger: winston.Logger) {
     }
 
-    async getNextVersion(pullRequest: PullRequest): Promise<VersionInfo> {
+    async getNextVersionFor(pullRequest: PullRequest): Promise<VersionInfo> {
 
         let isMinor = false;
         let isPatch = false;

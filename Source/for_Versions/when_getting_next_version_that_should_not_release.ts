@@ -13,10 +13,12 @@ describe("when getting next version that should not release", async () => {
         body: '',
         url: '',
         html_url: '',
-        number: 42
+        number: 42,
+        baseRefName: '',
+        headRefName: ''
     };
 
-    const version = await versions.getNextVersion(pullRequest);
+    const version = await versions.getNextVersionFor(pullRequest);
 
     it('should set is release to false', () => version.isRelease.should.be.false);
 });
