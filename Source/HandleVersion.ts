@@ -8,6 +8,7 @@ import { IPullRequests } from './IPullRequests';
 import { PullRequests } from './PullRequests';
 import { IVersions } from './IVersions';
 import { Versions } from './Versions';
+import { Tags } from './Tags';
 
 const octokit = new Octokit({ auth: inputs.gitHubToken });
 
@@ -49,4 +50,4 @@ export class HandleVersion {
 
 new HandleVersion(
     new PullRequests(octokit, logger),
-    new Versions(octokit, logger)).run();
+    new Versions(octokit, new Tags(octokit, logger), logger)).run();

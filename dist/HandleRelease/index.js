@@ -36158,6 +36158,7 @@ const inputs_1 = __importDefault(__nccwpck_require__(6755));
 const changeLog_1 = __nccwpck_require__(5431);
 const Versions_1 = __nccwpck_require__(4895);
 const PullRequests_1 = __nccwpck_require__(1674);
+const Tags_1 = __nccwpck_require__(3123);
 const octokit = new rest_1.Octokit({ auth: inputs_1.default.gitHubToken });
 class HandleRelease {
     constructor(_pullRequests, _versions) {
@@ -36194,7 +36195,7 @@ class HandleRelease {
     }
 }
 exports.HandleRelease = HandleRelease;
-new HandleRelease(new PullRequests_1.PullRequests(octokit, logging_1.logger), new Versions_1.Versions(octokit, logging_1.logger)).run();
+new HandleRelease(new PullRequests_1.PullRequests(octokit, logging_1.logger), new Versions_1.Versions(octokit, new Tags_1.Tags(octokit, logging_1.logger), logging_1.logger)).run();
 
 
 /***/ }),
@@ -36233,6 +36234,124 @@ class PullRequests {
     }
 }
 exports.PullRequests = PullRequests;
+
+
+/***/ }),
+
+/***/ 3123:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __asyncValues = (this && this.__asyncValues) || function (o) {
+    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+    var m = o[Symbol.asyncIterator], i;
+    return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i);
+    function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
+    function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
+};
+var __await = (this && this.__await) || function (v) { return this instanceof __await ? (this.v = v, this) : new __await(v); }
+var __asyncGenerator = (this && this.__asyncGenerator) || function (thisArg, _arguments, generator) {
+    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+    var g = generator.apply(thisArg, _arguments || []), i, q = [];
+    return i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i;
+    function verb(n) { if (g[n]) i[n] = function (v) { return new Promise(function (a, b) { q.push([n, v, a, b]) > 1 || resume(n, v); }); }; }
+    function resume(n, v) { try { step(g[n](v)); } catch (e) { settle(q[0][3], e); } }
+    function step(r) { r.value instanceof __await ? Promise.resolve(r.value.v).then(fulfill, reject) : settle(q[0][2], r); }
+    function fulfill(value) { resume("next", value); }
+    function reject(value) { resume("throw", value); }
+    function settle(f, v) { if (f(v), q.shift(), q.length) resume(q[0][0], q[0][1]); }
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Tags = void 0;
+const tag_cmp_1 = __nccwpck_require__(1710);
+const logging_1 = __nccwpck_require__(1938);
+class Tags {
+    constructor(_octokit, _logger) {
+        this._octokit = _octokit;
+        this._logger = _logger;
+    }
+    getLatestTag(octokit, owner, repo, releasesOnly, prefix, regex, sortTags) {
+        var e_1, _a;
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const endpoint = (releasesOnly ? octokit.repos.listReleases : octokit.repos.listTags);
+                const pages = endpoint.endpoint.merge({ "owner": owner, "repo": repo, "per_page": 100 });
+                const tags = [];
+                try {
+                    for (var _b = __asyncValues(this.getItemsFromPages(octokit, pages)), _c; _c = yield _b.next(), !_c.done;) {
+                        const item = _c.value;
+                        const tag = (releasesOnly ? item["tag_name"] : item["name"]);
+                        if (!tag.startsWith(prefix)) {
+                            continue;
+                        }
+                        if (regex && !new RegExp(regex).test(tag)) {
+                            continue;
+                        }
+                        if (!sortTags) {
+                            // Assume that the API returns the most recent tag(s) first.
+                            return tag;
+                        }
+                        tags.push(tag);
+                    }
+                }
+                catch (e_1_1) { e_1 = { error: e_1_1 }; }
+                finally {
+                    try {
+                        if (_c && !_c.done && (_a = _b.return)) yield _a.call(_b);
+                    }
+                    finally { if (e_1) throw e_1.error; }
+                }
+                if (tags.length === 0) {
+                    let error = `The repository "${owner}/${repo}" has no `;
+                    error += releasesOnly ? "releases" : "tags";
+                    if (prefix) {
+                        error += ` matching "${prefix}*"`;
+                    }
+                    throw error;
+                }
+                tags.sort(tag_cmp_1.cmpTags);
+                const [latestTag] = tags.slice(-1);
+                return latestTag;
+            }
+            catch (ex) {
+                logging_1.logger.error(`Couldn't get latest tag`);
+                logging_1.logger.error(ex);
+                return '';
+            }
+        });
+    }
+    getItemsFromPages(octokit, pages) {
+        return __asyncGenerator(this, arguments, function* getItemsFromPages_1() {
+            var e_2, _a;
+            try {
+                for (var _b = __asyncValues(octokit.paginate.iterator(pages)), _c; _c = yield __await(_b.next()), !_c.done;) {
+                    const page = _c.value;
+                    for (const item of page.data) {
+                        yield yield __await(item);
+                    }
+                }
+            }
+            catch (e_2_1) { e_2 = { error: e_2_1 }; }
+            finally {
+                try {
+                    if (_c && !_c.done && (_a = _b.return)) yield __await(_a.call(_b));
+                }
+                finally { if (e_2) throw e_2.error; }
+            }
+        });
+    }
+}
+exports.Tags = Tags;
 
 
 /***/ }),
@@ -36281,12 +36400,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Versions = void 0;
 const semver_1 = __importDefault(__nccwpck_require__(1383));
-const tags_1 = __nccwpck_require__(7061);
 const github_1 = __nccwpck_require__(5438);
 const VersionInfo_1 = __nccwpck_require__(3648);
 class Versions {
-    constructor(_octokit, _logger) {
+    constructor(_octokit, _tags, _logger) {
         this._octokit = _octokit;
+        this._tags = _tags;
         this._logger = _logger;
     }
     getNextVersion(pullRequest) {
@@ -36308,7 +36427,7 @@ class Versions {
                 }
                 return VersionInfo_1.VersionInfo.noRelease;
             }
-            let latestTag = yield (0, tags_1.getLatestTag)(this._octokit, github_1.context.repo.owner, github_1.context.repo.repo, true, 'v', '', true);
+            let latestTag = yield this._tags.getLatestTag(this._octokit, github_1.context.repo.owner, github_1.context.repo.repo, true, 'v', '', true);
             if (latestTag.toLowerCase().startsWith('v')) {
                 latestTag = latestTag.substring(1);
             }
@@ -36449,119 +36568,6 @@ const loggerOptions = {
 };
 const logger = (0, winston_1.createLogger)(loggerOptions);
 exports.logger = logger;
-
-
-/***/ }),
-
-/***/ 7061:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __asyncValues = (this && this.__asyncValues) || function (o) {
-    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
-    var m = o[Symbol.asyncIterator], i;
-    return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i);
-    function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
-    function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
-};
-var __await = (this && this.__await) || function (v) { return this instanceof __await ? (this.v = v, this) : new __await(v); }
-var __asyncGenerator = (this && this.__asyncGenerator) || function (thisArg, _arguments, generator) {
-    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
-    var g = generator.apply(thisArg, _arguments || []), i, q = [];
-    return i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i;
-    function verb(n) { if (g[n]) i[n] = function (v) { return new Promise(function (a, b) { q.push([n, v, a, b]) > 1 || resume(n, v); }); }; }
-    function resume(n, v) { try { step(g[n](v)); } catch (e) { settle(q[0][3], e); } }
-    function step(r) { r.value instanceof __await ? Promise.resolve(r.value.v).then(fulfill, reject) : settle(q[0][2], r); }
-    function fulfill(value) { resume("next", value); }
-    function reject(value) { resume("throw", value); }
-    function settle(f, v) { if (f(v), q.shift(), q.length) resume(q[0][0], q[0][1]); }
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getLatestTag = void 0;
-const tag_cmp_1 = __nccwpck_require__(1710);
-const logging_1 = __nccwpck_require__(1938);
-// Based on : https://github.com/oprypin/find-latest-tag
-function getLatestTag(octokit, owner, repo, releasesOnly, prefix, regex, sortTags) {
-    var e_1, _a;
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const endpoint = (releasesOnly ? octokit.repos.listReleases : octokit.repos.listTags);
-            const pages = endpoint.endpoint.merge({ "owner": owner, "repo": repo, "per_page": 100 });
-            const tags = [];
-            try {
-                for (var _b = __asyncValues(getItemsFromPages(octokit, pages)), _c; _c = yield _b.next(), !_c.done;) {
-                    const item = _c.value;
-                    const tag = (releasesOnly ? item["tag_name"] : item["name"]);
-                    if (!tag.startsWith(prefix)) {
-                        continue;
-                    }
-                    if (regex && !new RegExp(regex).test(tag)) {
-                        continue;
-                    }
-                    if (!sortTags) {
-                        // Assume that the API returns the most recent tag(s) first.
-                        return tag;
-                    }
-                    tags.push(tag);
-                }
-            }
-            catch (e_1_1) { e_1 = { error: e_1_1 }; }
-            finally {
-                try {
-                    if (_c && !_c.done && (_a = _b.return)) yield _a.call(_b);
-                }
-                finally { if (e_1) throw e_1.error; }
-            }
-            if (tags.length === 0) {
-                let error = `The repository "${owner}/${repo}" has no `;
-                error += releasesOnly ? "releases" : "tags";
-                if (prefix) {
-                    error += ` matching "${prefix}*"`;
-                }
-                throw error;
-            }
-            tags.sort(tag_cmp_1.cmpTags);
-            const [latestTag] = tags.slice(-1);
-            return latestTag;
-        }
-        catch (ex) {
-            logging_1.logger.error(`Couldn't get latest tag`);
-            logging_1.logger.error(ex);
-            return '';
-        }
-    });
-}
-exports.getLatestTag = getLatestTag;
-function getItemsFromPages(octokit, pages) {
-    return __asyncGenerator(this, arguments, function* getItemsFromPages_1() {
-        var e_2, _a;
-        try {
-            for (var _b = __asyncValues(octokit.paginate.iterator(pages)), _c; _c = yield __await(_b.next()), !_c.done;) {
-                const page = _c.value;
-                for (const item of page.data) {
-                    yield yield __await(item);
-                }
-            }
-        }
-        catch (e_2_1) { e_2 = { error: e_2_1 }; }
-        finally {
-            try {
-                if (_c && !_c.done && (_a = _b.return)) yield __await(_a.call(_b));
-            }
-            finally { if (e_2) throw e_2.error; }
-        }
-    });
-}
 
 
 /***/ }),
