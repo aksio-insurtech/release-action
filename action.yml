@@ -26,5 +26,7 @@ outputs:
     description: " Version number to publish with"
 
 runs:
-  using: "node12"
-  main: "dist/index.js"
+  using: "node16"
+  main: "dist/establishVersion.js"
+  post: 'dist/release.js'
+  post-if: 'success()'
