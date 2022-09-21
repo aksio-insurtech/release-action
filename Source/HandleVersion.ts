@@ -4,15 +4,16 @@ import { logger } from './logging';
 
 import inputs from './inputs';
 import outputs from './outputs';
-import { getNextVersion } from './version';
 import { IPullRequests } from './IPullRequests';
 import { PullRequests } from './PullRequests';
+import { IVersions } from './IVersions';
+import { Versions } from './Versions';
 
 const octokit = new Octokit({ auth: inputs.gitHubToken });
 
 export class HandleVersion {
 
-    constructor(readonly _pullRequests: IPullRequests) {
+    constructor(readonly _pullRequests: IPullRequests, readonly _versions: IVersions) {
     }
 
     async run(): Promise<void> {
@@ -32,10 +33,10 @@ export class HandleVersion {
                 return;
             }
 
-            const version = await getNextVersion(octokit, pullRequest);
+            const version = await this._versions.getNextVersion(pullRequest);
             if (!version) return;
 
-            outputs.setVersion(version.version);
+            outputs.setVersion(version.version.version);
             outputs.setShouldPublish(true);
         } catch (ex) {
             logger.error("Something went wrong");
@@ -46,4 +47,6 @@ export class HandleVersion {
     }
 }
 
-new HandleVersion(new PullRequests(logger, octokit)).run();
+new HandleVersion(
+    new PullRequests(octokit, logger),
+    new Versions(octokit, logger)).run();

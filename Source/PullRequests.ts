@@ -5,7 +5,7 @@ import { PullRequest } from './PullRequest';
 import { Octokit } from '@octokit/rest';
 
 export class PullRequests implements IPullRequests {
-    constructor(readonly _logger: winston.Logger, readonly _octokit: Octokit) {
+    constructor(readonly _octokit: Octokit, readonly _logger: winston.Logger) {
     }
 
     async getMergedPullRequest(): Promise<PullRequest | undefined> {

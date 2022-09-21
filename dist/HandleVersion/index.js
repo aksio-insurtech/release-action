@@ -31789,12 +31789,13 @@ const rest_1 = __nccwpck_require__(5375);
 const logging_1 = __nccwpck_require__(1938);
 const inputs_1 = __importDefault(__nccwpck_require__(6755));
 const outputs_1 = __importDefault(__nccwpck_require__(7338));
-const version_1 = __nccwpck_require__(3025);
 const PullRequests_1 = __nccwpck_require__(1674);
+const Versions_1 = __nccwpck_require__(4895);
 const octokit = new rest_1.Octokit({ auth: inputs_1.default.gitHubToken });
 class HandleVersion {
-    constructor(_pullRequests) {
+    constructor(_pullRequests, _versions) {
         this._pullRequests = _pullRequests;
+        this._versions = _versions;
     }
     run() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -31813,10 +31814,10 @@ class HandleVersion {
                     outputs_1.default.setShouldPublish(false);
                     return;
                 }
-                const version = yield (0, version_1.getNextVersion)(octokit, pullRequest);
+                const version = yield this._versions.getNextVersion(pullRequest);
                 if (!version)
                     return;
-                outputs_1.default.setVersion(version.version);
+                outputs_1.default.setVersion(version.version.version);
                 outputs_1.default.setShouldPublish(true);
             }
             catch (ex) {
@@ -31828,7 +31829,7 @@ class HandleVersion {
     }
 }
 exports.HandleVersion = HandleVersion;
-new HandleVersion(new PullRequests_1.PullRequests(logging_1.logger, octokit)).run();
+new HandleVersion(new PullRequests_1.PullRequests(octokit, logging_1.logger), new Versions_1.Versions(octokit, logging_1.logger)).run();
 
 
 /***/ }),
@@ -31851,9 +31852,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.PullRequests = void 0;
 const github_1 = __nccwpck_require__(5438);
 class PullRequests {
-    constructor(_logger, _octokit) {
-        this._logger = _logger;
+    constructor(_octokit, _logger) {
         this._octokit = _octokit;
+        this._logger = _logger;
     }
     getMergedPullRequest() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -31867,6 +31868,107 @@ class PullRequests {
     }
 }
 exports.PullRequests = PullRequests;
+
+
+/***/ }),
+
+/***/ 3648:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.VersionInfo = void 0;
+class VersionInfo {
+    constructor(version, isMajor, isMinor, isPatch, shouldRelease, valid) {
+        this.version = version;
+        this.isMajor = isMajor;
+        this.isMinor = isMinor;
+        this.isPatch = isPatch;
+        this.shouldRelease = shouldRelease;
+        this.valid = valid;
+    }
+}
+exports.VersionInfo = VersionInfo;
+VersionInfo.invalid = new VersionInfo(undefined, false, false, false, false, false);
+VersionInfo.noRelease = new VersionInfo(undefined, false, false, false, false, true);
+
+
+/***/ }),
+
+/***/ 4895:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Versions = void 0;
+const semver_1 = __importDefault(__nccwpck_require__(1383));
+const tags_1 = __nccwpck_require__(7061);
+const github_1 = __nccwpck_require__(5438);
+const VersionInfo_1 = __nccwpck_require__(3648);
+class Versions {
+    constructor(_octokit, _logger) {
+        this._octokit = _octokit;
+        this._logger = _logger;
+    }
+    getNextVersion(pullRequest) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let isMinor = false;
+            let isPatch = false;
+            const isMajor = pullRequest.labels.some(_ => _.name === 'major');
+            if (!isMajor) {
+                isMinor = pullRequest.labels.some(_ => _.name === 'minor');
+                if (!isMinor) {
+                    isPatch = pullRequest.labels.some(_ => _.name === 'patch');
+                }
+            }
+            if (!isMajor && !isMinor && !isPatch) {
+                this._logger.info('No release related labels associated with the PR.');
+                if (pullRequest.labels.length > 0) {
+                    this._logger.info('Labels associated with PR:');
+                    pullRequest.labels.forEach(_ => this._logger.info(`  - ${_.name}`));
+                }
+                return VersionInfo_1.VersionInfo.noRelease;
+            }
+            let latestTag = yield (0, tags_1.getLatestTag)(this._octokit, github_1.context.repo.owner, github_1.context.repo.repo, true, 'v', '', true);
+            if (latestTag.toLowerCase().startsWith('v')) {
+                latestTag = latestTag.substring(1);
+            }
+            else {
+                latestTag = 'v0.0.0';
+                this._logger.info('No valid version found in tags - setting to v0.0.0');
+            }
+            this._logger.info(`Latest tag: ${latestTag}`);
+            let version = semver_1.default.parse(latestTag);
+            if (!version) {
+                this._logger.error(`Version string '${latestTag}' is not in a valid format`);
+                return VersionInfo_1.VersionInfo.invalid;
+            }
+            if (isMajor)
+                version = version.inc('major') || version;
+            if (isMinor)
+                version = version.inc('minor') || version;
+            if (isPatch)
+                version = version.inc('patch') || version;
+            this._logger.info(`New version is '${version.version}''`);
+            return new VersionInfo_1.VersionInfo(version, isMajor, isMinor, isPatch, true, true);
+        });
+    }
+}
+exports.Versions = Versions;
 
 
 /***/ }),
@@ -32043,77 +32145,6 @@ function getItemsFromPages(octokit, pages) {
         }
     });
 }
-
-
-/***/ }),
-
-/***/ 3025:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getNextVersion = void 0;
-const semver_1 = __importDefault(__nccwpck_require__(1383));
-const logging_1 = __nccwpck_require__(1938);
-const tags_1 = __nccwpck_require__(7061);
-const github_1 = __nccwpck_require__(5438);
-function getNextVersion(octokit, pullRequest) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let isMinor = false;
-        let isPatch = false;
-        const isMajor = pullRequest.labels.some(_ => _.name === 'major');
-        if (!isMajor) {
-            isMinor = pullRequest.labels.some(_ => _.name === 'minor');
-            if (!isMinor) {
-                isPatch = pullRequest.labels.some(_ => _.name === 'patch');
-            }
-        }
-        if (!isMajor && !isMinor && !isPatch) {
-            logging_1.logger.info('No release related labels associated with the PR.');
-            if (pullRequest.labels.length > 0) {
-                logging_1.logger.info('Labels associated with PR:');
-                pullRequest.labels.forEach(_ => logging_1.logger.info(`  - ${_.name}`));
-            }
-            return;
-        }
-        let latestTag = yield (0, tags_1.getLatestTag)(octokit, github_1.context.repo.owner, github_1.context.repo.repo, true, 'v', '', true);
-        if (latestTag.toLowerCase().startsWith('v')) {
-            latestTag = latestTag.substr(1);
-        }
-        else {
-            latestTag = 'v0.0.0';
-            logging_1.logger.info('No valid version found in tags - setting to v0.0.0');
-        }
-        logging_1.logger.info(`Latest tag: ${latestTag}`);
-        let version = semver_1.default.parse(latestTag);
-        if (!version) {
-            logging_1.logger.error(`Version string '${latestTag}' is not in a valid format`);
-            return;
-        }
-        if (isMajor)
-            version = version.inc('major') || version;
-        if (isMinor)
-            version = version.inc('minor') || version;
-        if (isPatch)
-            version = version.inc('patch') || version;
-        logging_1.logger.info(`New version is '${version.version}''`);
-        return version;
-    });
-}
-exports.getNextVersion = getNextVersion;
 
 
 /***/ }),

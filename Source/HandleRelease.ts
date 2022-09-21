@@ -3,24 +3,24 @@ import { Octokit } from '@octokit/rest';
 
 import { logger } from './logging';
 import inputs from './inputs';
-import outputs from './outputs';
 import { prependToChangeLog } from './changeLog';
-import { getNextVersion } from './version';
+import { Versions } from './Versions';
 import { IPullRequests } from './IPullRequests';
 import { PullRequests } from './PullRequests';
+import { IVersions } from './IVersions';
 
 const octokit = new Octokit({ auth: inputs.gitHubToken });
 
 export class HandleRelease {
 
-    constructor(readonly _pullRequests: IPullRequests) {
+    constructor(readonly _pullRequests: IPullRequests, readonly _versions: IVersions) {
     }
 
     async run(): Promise<void> {
         const pullRequest = await this._pullRequests.getMergedPullRequest();
         if (!pullRequest) return;
 
-        const version = await getNextVersion(octokit, pullRequest);
+        const version = await this._versions.getNextVersion(pullRequest);
         if (!version) return;
 
         logger.info(`Create release for version '${version.version}'`);
@@ -42,16 +42,13 @@ export class HandleRelease {
         logger.info(release);
 
         await octokit.repos.createRelease(release);
-
         logger.info('GitHub release created');
 
         await prependToChangeLog(pullRequest.body || '', `v${version.version}`, pullRequest.number, pullRequest.html_url);
-
         logger.info('Prepended to changelog');
-
-        outputs.setVersion(version.version);
-        outputs.setShouldPublish(true);
     }
 }
 
-new HandleRelease(new PullRequests(logger, octokit)).run();
+new HandleRelease(
+    new PullRequests(octokit, logger),
+    new Versions(octokit, logger)).run();
