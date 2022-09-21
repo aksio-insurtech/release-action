@@ -10,7 +10,7 @@ export class VersionInfo {
         readonly isMajor: boolean,
         readonly isMinor: boolean,
         readonly isPatch: boolean,
-        readonly shouldRelease: boolean,
-        readonly valid: boolean) {
+        readonly isRelease: boolean,
+        readonly isValid: boolean) {
     }
 }

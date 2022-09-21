@@ -34,7 +34,6 @@ export class Versions implements IVersions {
         }
 
         let latestTag = await this._tags.getLatestTag(
-            this._octokit,
             context.repo.owner,
             context.repo.repo,
             true,
