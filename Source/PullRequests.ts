@@ -17,7 +17,13 @@ export class PullRequests implements IPullRequests {
 
         const mergedPullRequest = await this._octokit.paginate(
             this._octokit.pulls.list,
-            { owner, repo, state: 'closed', sort: 'updated', direction: 'desc' }
+            {
+                owner,
+                repo,
+                state: 'closed',
+                sort: 'updated',
+                direction: 'desc'
+            }
         ).then(data => data.find(pr => pr.merge_commit_sha === sha));
 
         return mergedPullRequest;

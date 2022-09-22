@@ -19,8 +19,8 @@ describe("when getting next version that should not release", async () => {
         url: '',
         html_url: '',
         number: 42,
-        baseRefName: '',
-        headRefName: ''
+        base: { ref: '' },
+        head: { ref: '' }
     };
 
     const version = await versions.getNextVersionFor(pullRequest);

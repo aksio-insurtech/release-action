@@ -19,8 +19,8 @@ describe("when getting next version and latest tag has all parts set and there i
         url: '',
         html_url: '',
         number: 42,
-        baseRefName: '',
-        headRefName: ''
+        base: { ref: '' },
+        head: { ref: '' }
     };
 
     const version = await versions.getNextVersionFor(pullRequest);
