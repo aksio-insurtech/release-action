@@ -10,7 +10,7 @@ describe("when getting next version and target branch is a semantic version numb
         getLatestTag: sinon.stub().returns('1.2.3')
     };
 
-    const versions = new Versions(sinon.stub() as any, fakeContext, fakeTags, fakeLogger);
+    const versions = new Versions(sinon.stub() as any, fakeContext(), fakeTags, fakeLogger);
 
     const pullRequest: PullRequest = {
         labels: [],
@@ -23,8 +23,6 @@ describe("when getting next version and target branch is a semantic version numb
     };
 
     const version = await versions.getNextVersionFor(pullRequest);
-
-    console.log(version);
 
     it('should set release to true', () => version.isRelease.should.be.true);
     it('should be a prerelease', () => version.isPreRelease.should.be.true);

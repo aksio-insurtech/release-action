@@ -31785,6 +31785,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.HandleVersion = void 0;
+const github_1 = __nccwpck_require__(5438);
 const rest_1 = __nccwpck_require__(5375);
 const logging_1 = __nccwpck_require__(1938);
 const inputs_1 = __importDefault(__nccwpck_require__(6755));
@@ -31815,7 +31816,7 @@ class HandleVersion {
                     outputs_1.default.setShouldPublish(false);
                     return;
                 }
-                const version = yield this._versions.getNextVersion(pullRequest);
+                const version = yield this._versions.getNextVersionFor(pullRequest);
                 if (!version)
                     return;
                 outputs_1.default.setVersion(version.version.version);
@@ -31830,13 +31831,13 @@ class HandleVersion {
     }
 }
 exports.HandleVersion = HandleVersion;
-new HandleVersion(new PullRequests_1.PullRequests(octokit, logging_1.logger), new Versions_1.Versions(octokit, new Tags_1.Tags(octokit, logging_1.logger), logging_1.logger)).run();
+new HandleVersion(new PullRequests_1.PullRequests(octokit, github_1.context, logging_1.logger), new Versions_1.Versions(octokit, github_1.context, new Tags_1.Tags(octokit, github_1.context, logging_1.logger), logging_1.logger)).run();
 
 
 /***/ }),
 
 /***/ 1674:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+/***/ (function(__unused_webpack_module, exports) {
 
 "use strict";
 
@@ -31851,19 +31852,25 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.PullRequests = void 0;
-const github_1 = __nccwpck_require__(5438);
 class PullRequests {
-    constructor(_octokit, _logger) {
+    constructor(_octokit, _context, _logger) {
         this._octokit = _octokit;
+        this._context = _context;
         this._logger = _logger;
     }
     getMergedPullRequest() {
         return __awaiter(this, void 0, void 0, function* () {
-            const owner = github_1.context.repo.owner;
-            const repo = github_1.context.repo.repo;
-            const sha = github_1.context.sha;
+            const owner = this._context.repo.owner;
+            const repo = this._context.repo.repo;
+            const sha = this._context.sha;
             this._logger.debug(`Getting merged pull request for: '${sha}''`);
-            const mergedPullRequest = yield this._octokit.paginate(this._octokit.pulls.list, { owner, repo, state: 'closed', sort: 'updated', direction: 'desc' }).then(data => data.find(pr => pr.merge_commit_sha === sha));
+            const mergedPullRequest = yield this._octokit.paginate(this._octokit.pulls.list, {
+                owner,
+                repo,
+                state: 'closed',
+                sort: 'updated',
+                direction: 'desc'
+            }).then(data => data.find(pr => pr.merge_commit_sha === sha));
             return mergedPullRequest;
         });
     }
@@ -31911,19 +31918,22 @@ exports.Tags = void 0;
 const tag_cmp_1 = __nccwpck_require__(1710);
 const logging_1 = __nccwpck_require__(1938);
 class Tags {
-    constructor(_octokit, _logger) {
+    constructor(_octokit, _context, _logger) {
         this._octokit = _octokit;
+        this._context = _context;
         this._logger = _logger;
     }
-    getLatestTag(octokit, owner, repo, releasesOnly, prefix, regex, sortTags) {
+    getLatestTag(releasesOnly, prefix, regex, sortTags) {
         var e_1, _a;
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const endpoint = (releasesOnly ? octokit.repos.listReleases : octokit.repos.listTags);
+                const owner = this._context.repo.owner;
+                const repo = this._context.repo.repo;
+                const endpoint = (releasesOnly ? this._octokit.repos.listReleases : this._octokit.repos.listTags);
                 const pages = endpoint.endpoint.merge({ "owner": owner, "repo": repo, "per_page": 100 });
                 const tags = [];
                 try {
-                    for (var _b = __asyncValues(this.getItemsFromPages(octokit, pages)), _c; _c = yield _b.next(), !_c.done;) {
+                    for (var _b = __asyncValues(this.getItemsFromPages(this._octokit, pages)), _c; _c = yield _b.next(), !_c.done;) {
                         const item = _c.value;
                         const tag = (releasesOnly ? item["tag_name"] : item["name"]);
                         if (!tag.startsWith(prefix)) {
@@ -31999,18 +32009,19 @@ exports.Tags = Tags;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.VersionInfo = void 0;
 class VersionInfo {
-    constructor(version, isMajor, isMinor, isPatch, shouldRelease, valid) {
+    constructor(version, isMajor, isMinor, isPatch, isRelease, isPreRelease, isValid) {
         this.version = version;
         this.isMajor = isMajor;
         this.isMinor = isMinor;
         this.isPatch = isPatch;
-        this.shouldRelease = shouldRelease;
-        this.valid = valid;
+        this.isRelease = isRelease;
+        this.isPreRelease = isPreRelease;
+        this.isValid = isValid;
     }
 }
 exports.VersionInfo = VersionInfo;
-VersionInfo.invalid = new VersionInfo(undefined, false, false, false, false, false);
-VersionInfo.noRelease = new VersionInfo(undefined, false, false, false, false, true);
+VersionInfo.invalid = new VersionInfo(undefined, false, false, false, false, false, false);
+VersionInfo.noRelease = new VersionInfo(undefined, false, false, false, false, false, true);
 
 
 /***/ }),
@@ -32020,6 +32031,29 @@ VersionInfo.noRelease = new VersionInfo(undefined, false, false, false, false, t
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -32029,61 +32063,78 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Versions = void 0;
-const semver_1 = __importDefault(__nccwpck_require__(1383));
-const github_1 = __nccwpck_require__(5438);
+const semver_1 = __importStar(__nccwpck_require__(1383));
 const VersionInfo_1 = __nccwpck_require__(3648);
 class Versions {
-    constructor(_octokit, _tags, _logger) {
+    constructor(_octokit, _context, _tags, _logger) {
         this._octokit = _octokit;
+        this._context = _context;
         this._tags = _tags;
         this._logger = _logger;
     }
-    getNextVersion(pullRequest) {
+    getNextVersionFor(pullRequest) {
         return __awaiter(this, void 0, void 0, function* () {
+            // If the pull request points to a headRefName that is semantic version number
+            //    set base version to be the headRefName version number
+            // If the pull request is targeting a baseRefName that is a semantic version number
+            //    set base version to be the baseRefName version number
+            // If the pull request is not in a branch or targeting a branch with a semantic version number
+            //    set base version to the latest tag and rely on labels (major, minor, patch) to dictate target version number
+            // If the pull request has not been merged
+            //    generate version number: <major>.<minor>.<patch>-PR<number>.<incremental number>
+            const preRelease = `pr${pullRequest.number}.${this._context.sha.substring(0, 7)}`;
+            let isMajor = false;
             let isMinor = false;
             let isPatch = false;
-            const isMajor = pullRequest.labels.some(_ => _.name === 'major');
-            if (!isMajor) {
-                isMinor = pullRequest.labels.some(_ => _.name === 'minor');
-                if (!isMinor) {
-                    isPatch = pullRequest.labels.some(_ => _.name === 'patch');
-                }
-            }
-            if (!isMajor && !isMinor && !isPatch) {
-                this._logger.info('No release related labels associated with the PR.');
-                if (pullRequest.labels.length > 0) {
-                    this._logger.info('Labels associated with PR:');
-                    pullRequest.labels.forEach(_ => this._logger.info(`  - ${_.name}`));
-                }
-                return VersionInfo_1.VersionInfo.noRelease;
-            }
-            let latestTag = yield this._tags.getLatestTag(this._octokit, github_1.context.repo.owner, github_1.context.repo.repo, true, 'v', '', true);
-            if (latestTag.toLowerCase().startsWith('v')) {
-                latestTag = latestTag.substring(1);
+            let version = semver_1.default.parse(pullRequest.head.ref);
+            if (version) {
+                version = new semver_1.SemVer(`${version.major}.${version.minor}.${version.patch}-${preRelease}`);
             }
             else {
-                latestTag = 'v0.0.0';
-                this._logger.info('No valid version found in tags - setting to v0.0.0');
+                version = semver_1.default.parse(pullRequest.base.ref);
+                if (version) {
+                    version = new semver_1.SemVer(`${version.major}.${version.minor}.${version.patch}-${preRelease}`);
+                }
             }
-            this._logger.info(`Latest tag: ${latestTag}`);
-            let version = semver_1.default.parse(latestTag);
             if (!version) {
-                this._logger.error(`Version string '${latestTag}' is not in a valid format`);
+                let latestTag = yield this._tags.getLatestTag(true, 'v', '', true);
+                if (latestTag.toLowerCase().startsWith('v')) {
+                    latestTag = latestTag.substring(1);
+                }
+                this._logger.info(`Latest tag: ${latestTag}`);
+                version = semver_1.default.parse(latestTag);
+            }
+            if (!version) {
+                this._logger.error(`Version string '${version}' is not in a valid format`);
                 return VersionInfo_1.VersionInfo.invalid;
             }
-            if (isMajor)
-                version = version.inc('major') || version;
-            if (isMinor)
-                version = version.inc('minor') || version;
-            if (isPatch)
-                version = version.inc('patch') || version;
+            if (this._context.eventName == 'closed') {
+                isMajor = pullRequest.labels.some(_ => _.name === 'major');
+                if (!isMajor) {
+                    isMinor = pullRequest.labels.some(_ => _.name === 'minor');
+                    if (!isMinor) {
+                        isPatch = pullRequest.labels.some(_ => _.name === 'patch');
+                    }
+                }
+                if (!isMajor && !isMinor && !isPatch) {
+                    this._logger.info('No release related labels associated with the PR.');
+                    if (pullRequest.labels.length > 0) {
+                        this._logger.info('Labels associated with PR:');
+                        pullRequest.labels.forEach(_ => this._logger.info(`  - ${_.name}`));
+                    }
+                    return VersionInfo_1.VersionInfo.noRelease;
+                }
+                if (isMajor)
+                    version = version.inc('major') || version;
+                if (isMinor)
+                    version = version.inc('minor') || version;
+                if (isPatch)
+                    version = version.inc('patch') || version;
+            }
             this._logger.info(`New version is '${version.version}''`);
-            return new VersionInfo_1.VersionInfo(version, isMajor, isMinor, isPatch, true, true);
+            return new VersionInfo_1.VersionInfo(version, isMajor, isMinor, isPatch, true, version.prerelease.length > 0, true);
         });
     }
 }

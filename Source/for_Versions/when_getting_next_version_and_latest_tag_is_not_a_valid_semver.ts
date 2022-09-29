@@ -4,14 +4,13 @@ import { PullRequest } from '../PullRequest';
 import fakeLogger from '../fakeLogger';
 import fakeContext from '../fakeContext';
 import { ITags } from '../ITags';
-import semver from 'semver';
 
 describe("when getting next version and latest tag is not a valid semver", async () => {
     const fakeTags: ITags = {
         getLatestTag: sinon.stub().returns('gibberish')
     };
 
-    const versions = new Versions(sinon.stub() as any, fakeContext, fakeTags, fakeLogger);
+    const versions = new Versions(sinon.stub() as any, fakeContext(), fakeTags, fakeLogger);
     const pullRequest: PullRequest = {
         labels: [{ name: 'patch' }],
         body: '',
