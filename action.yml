@@ -24,6 +24,8 @@ outputs:
     description: "Whether or not a publish should be done"
   version:
     description: " Version number to publish with"
+  prerelease:
+    description: "Whether or not it is a prerelease"
 
 runs:
   using: "node16"

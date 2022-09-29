@@ -20,6 +20,7 @@ export class HandleVersion {
 
     async run(): Promise<void> {
         try {
+            outputs.setPrerelease(false);
             const pullRequest = await this._pullRequests.getMergedPullRequest();
             if (!pullRequest) {
                 logger.error('No merged PR found.');
@@ -40,6 +41,7 @@ export class HandleVersion {
 
             outputs.setVersion(version.version.version);
             outputs.setShouldPublish(true);
+            outputs.setPrerelease(version.isPrerelease);
         } catch (ex) {
             logger.error("Something went wrong");
             logger.error(ex);

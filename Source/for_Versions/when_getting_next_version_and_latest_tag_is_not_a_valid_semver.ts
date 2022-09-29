@@ -25,5 +25,5 @@ describe("when getting next version and latest tag is not a valid semver", async
 
     it('should set is release to false', () => version.isRelease.should.be.false);
     it('should set is is valid to false', () => version.isValid.should.be.false);
-    it('should not be a prerelease', () => version.isPreRelease.should.be.false);
+    it('should not be a prerelease', () => version.isPrerelease.should.be.false);
 });

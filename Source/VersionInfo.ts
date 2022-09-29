@@ -11,7 +11,7 @@ export class VersionInfo {
         readonly isMinor: boolean,
         readonly isPatch: boolean,
         readonly isRelease: boolean,
-        readonly isPreRelease: boolean,
+        readonly isPrerelease: boolean,
         readonly isValid: boolean) {
     }
 }

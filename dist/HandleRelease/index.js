@@ -36390,13 +36390,13 @@ exports.Tags = Tags;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.VersionInfo = void 0;
 class VersionInfo {
-    constructor(version, isMajor, isMinor, isPatch, isRelease, isPreRelease, isValid) {
+    constructor(version, isMajor, isMinor, isPatch, isRelease, isPrerelease, isValid) {
         this.version = version;
         this.isMajor = isMajor;
         this.isMinor = isMinor;
         this.isPatch = isPatch;
         this.isRelease = isRelease;
-        this.isPreRelease = isPreRelease;
+        this.isPrerelease = isPrerelease;
         this.isValid = isValid;
     }
 }
@@ -36457,14 +36457,6 @@ class Versions {
     }
     getNextVersionFor(pullRequest) {
         return __awaiter(this, void 0, void 0, function* () {
-            // If the pull request points to a headRefName that is semantic version number
-            //    set base version to be the headRefName version number
-            // If the pull request is targeting a baseRefName that is a semantic version number
-            //    set base version to be the baseRefName version number
-            // If the pull request is not in a branch or targeting a branch with a semantic version number
-            //    set base version to the latest tag and rely on labels (major, minor, patch) to dictate target version number
-            // If the pull request has not been merged
-            //    generate version number: <major>.<minor>.<patch>-PR<number>.<incremental number>
             const preRelease = `pr${pullRequest.number}.${this._context.sha.substring(0, 7)}`;
             let isMajor = false;
             let isMinor = false;

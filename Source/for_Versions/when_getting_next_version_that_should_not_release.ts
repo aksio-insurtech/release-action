@@ -25,5 +25,5 @@ describe("when getting next version that should not release", async () => {
     const version = await versions.getNextVersionFor(pullRequest);
 
     it('should set is release to false', () => version.isRelease.should.be.false);
-    it('should not be a prerelease', () => version.isPreRelease.should.be.false);
+    it('should not be a prerelease', () => version.isPrerelease.should.be.false);
 });
