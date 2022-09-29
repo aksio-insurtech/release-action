@@ -7,5 +7,9 @@ export default {
 
     setShouldPublish(value: boolean) {
         setOutput('should-publish', value);
+    },
+
+    setPrerelease(value: boolean) {
+        setOutput('prerelease', value);
     }
 };
