@@ -1,7 +1,6 @@
 # Release Action
 
-This is a [composite action](https://docs.github.com/en/actions/creating-actions/creating-a-composite-action) to encapsulate
-a standard way to do release, tailored for the needs we have at Aksio.
+This GitHub action handles versioning and releasing to GitHub releases.
 
 ## What does it do
 
@@ -15,7 +14,17 @@ one of the following labels adhering to [semantic versioning version 2](https://
 | Patch | Bug fixes |
 
 If none of these labels are present, it doesn't consider this to be a release and will not produce a GitHub release and returns
-the property of `should-publish` with `false`.
+the property of `should-publish` with `false`. This condition is only valid for a **closed** GitHub event.
+
+In addition it will look at the branch ref the pull request lives in. If the branch name is a semantic version number, it will use this as the
+basis for a version number and generate a prerelease version number based on the PR number and the sha of the commit:
+
+<major>.<minor>.<patch>-PR<number>.<short sha>.
+
+Similar if the target branch has a name that is a semantic version number, it will use this to form a prerelease version number.
+
+This behavior can be useful for building artifacts that is linked to a pull request and one wants to test them out before they are actually
+merged down to the target branch.
 
 It runs the following steps:
 
