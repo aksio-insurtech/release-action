@@ -13,15 +13,6 @@ export class Versions implements IVersions {
     }
 
     async getNextVersionFor(pullRequest: PullRequest): Promise<VersionInfo> {
-        // If the pull request points to a headRefName that is semantic version number
-        //    set base version to be the headRefName version number
-        // If the pull request is targeting a baseRefName that is a semantic version number
-        //    set base version to be the baseRefName version number
-        // If the pull request is not in a branch or targeting a branch with a semantic version number
-        //    set base version to the latest tag and rely on labels (major, minor, patch) to dictate target version number
-        // If the pull request has not been merged
-        //    generate version number: <major>.<minor>.<patch>-PR<number>.<incremental number>
-
         const preRelease = `pr${pullRequest.number}.${this._context.sha.substring(0, 7)}`;
         let isMajor = false;
         let isMinor = false;
