@@ -87,3 +87,4 @@ jobs:
 | -------- | ----------- |
 | should-publish | Whether or not a publish should be done |
 | version | Version number to publish with |
+| prerelease | Whether or not a it is a prerelease |
