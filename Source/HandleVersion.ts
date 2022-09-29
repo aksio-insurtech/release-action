@@ -51,4 +51,4 @@ export class HandleVersion {
 
 new HandleVersion(
     new PullRequests(octokit, context, logger),
-    new Versions(octokit, new Tags(octokit, context, logger), logger)).run();
+    new Versions(octokit, context, new Tags(octokit, context, logger), logger)).run();

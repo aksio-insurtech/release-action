@@ -5,30 +5,28 @@ import fakeLogger from '../fakeLogger';
 import fakeContext from '../fakeContext';
 import { ITags } from '../ITags';
 
-describe("when getting next version that should not release", async () => {
+describe("when getting next version and target branch is a semantic version number", async () => {
     const fakeTags: ITags = {
-        getLatestTag: sinon.stub().returns('v1.0.0')
+        getLatestTag: sinon.stub().returns('1.2.3')
     };
 
-    Object.defineProperty(fakeContext, "eventName", {
-        get: () => {
-            return 'closed';
-        }
-    });
-
     const versions = new Versions(sinon.stub() as any, fakeContext, fakeTags, fakeLogger);
+
     const pullRequest: PullRequest = {
         labels: [],
         body: '',
         url: '',
         html_url: '',
         number: 42,
-        base: { ref: '' },
+        base: { ref: '6.4.7' },
         head: { ref: '' }
     };
 
     const version = await versions.getNextVersionFor(pullRequest);
 
-    it('should set is release to false', () => version.isRelease.should.be.false);
-    it('should not be a prerelease', () => version.isPreRelease.should.be.false);
+    console.log(version);
+
+    it('should set release to true', () => version.isRelease.should.be.true);
+    it('should be a prerelease', () => version.isPreRelease.should.be.true);
+    it('should create correct version', () => version.version.raw.should.equal('6.4.7-pr42.cf05d51'));
 });

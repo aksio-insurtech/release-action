@@ -8,9 +8,7 @@ import semver from 'semver';
 
 describe("when getting next version and latest tag is not a valid semver", async () => {
     const fakeTags: ITags = {
-        getLatestTag(releaseOnly: boolean, prefix: string, regex: string, sortTags): Promise<string> {
-            return new Promise((resolve) => resolve("gibberish"));
-        }
+        getLatestTag: sinon.stub().returns('gibberish')
     };
 
     const versions = new Versions(sinon.stub() as any, fakeContext, fakeTags, fakeLogger);
@@ -28,4 +26,5 @@ describe("when getting next version and latest tag is not a valid semver", async
 
     it('should set is release to false', () => version.isRelease.should.be.false);
     it('should set is is valid to false', () => version.isValid.should.be.false);
+    it('should not be a prerelease', () => version.isPreRelease.should.be.false);
 });
