@@ -36269,7 +36269,7 @@ class PullRequests {
             const pullRequest = yield this._octokit.paginate(this._octokit.pulls.list, {
                 owner,
                 repo,
-                state: 'closed',
+                state: 'open',
                 sort: 'updated',
                 direction: 'desc'
             }).then(data => data.find(pr => pr.number === pull_number));

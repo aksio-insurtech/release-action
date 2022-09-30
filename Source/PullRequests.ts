@@ -47,7 +47,7 @@ export class PullRequests implements IPullRequests {
             {
                 owner,
                 repo,
-                state: 'closed',
+                state: 'open',
                 sort: 'updated',
                 direction: 'desc'
             }
