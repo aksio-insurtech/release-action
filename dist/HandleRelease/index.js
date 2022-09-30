@@ -36259,16 +36259,19 @@ class PullRequests {
         return __awaiter(this, void 0, void 0, function* () {
             const owner = this._context.repo.owner;
             const repo = this._context.repo.repo;
-            const sha = this._context.sha;
-            this._logger.debug(`Getting open pull request for: '${sha}''`);
-            const openPullRequest = yield this._octokit.paginate(this._octokit.pulls.list, {
+            const commit_sha = this._context.sha;
+            this._logger.debug(`Getting open pull request for: '${commit_sha}''`);
+            const pullRequests = yield this._octokit.rest.repos.listPullRequestsAssociatedWithCommit({
                 owner,
                 repo,
-                state: 'open',
-                sort: 'updated',
-                direction: 'desc'
-            }).then(data => data.find(pr => pr.head.sha === sha));
-            return openPullRequest;
+                commit_sha
+            });
+            const filtered = pullRequests.data
+                .filter(({ state }) => state === 'open')
+                .filter(({ head }) => head.sha.startsWith(commit_sha));
+            if (filtered.length === 0)
+                return undefined;
+            return filtered[0];
         });
     }
 }

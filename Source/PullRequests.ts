@@ -32,21 +32,22 @@ export class PullRequests implements IPullRequests {
     async getPullRequestForCurrentSha(): Promise<PullRequest | undefined> {
         const owner = this._context.repo.owner;
         const repo = this._context.repo.repo;
-        const sha = this._context.sha;
+        const commit_sha = this._context.sha;
 
-        this._logger.debug(`Getting open pull request for: '${sha}''`);
+        this._logger.debug(`Getting open pull request for: '${commit_sha}''`);
 
-        const openPullRequest = await this._octokit.paginate(
-            this._octokit.pulls.list,
-            {
-                owner,
-                repo,
-                state: 'open',
-                sort: 'updated',
-                direction: 'desc'
-            }
-        ).then(data => data.find(pr => pr.head.sha === sha));
+        const pullRequests = await this._octokit.rest.repos.listPullRequestsAssociatedWithCommit({
+            owner,
+            repo,
+            commit_sha
+        });
 
-        return openPullRequest;
+        const filtered = pullRequests.data
+            .filter(({state}) => state === 'open')
+            .filter(({head}) => head.sha.startsWith(commit_sha));
+
+        if( filtered.length === 0) return undefined;
+
+        return filtered[0];
     }
 }
