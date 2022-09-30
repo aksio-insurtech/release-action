@@ -31885,7 +31885,7 @@ class PullRequests {
             const owner = this._context.repo.owner;
             const repo = this._context.repo.repo;
             const sha = this._context.sha;
-            this._logger.debug(`Getting merged pull request for: '${sha}''`);
+            this._logger.info(`Getting merged pull request for: '${sha}''`);
             const mergedPullRequest = yield this._octokit.paginate(this._octokit.pulls.list, {
                 owner,
                 repo,
@@ -31901,7 +31901,7 @@ class PullRequests {
             const owner = this._context.repo.owner;
             const repo = this._context.repo.repo;
             const commit_sha = this._context.sha;
-            this._logger.debug(`Getting open pull request for: '${commit_sha}''`);
+            this._logger.info(`Getting open pull request for: '${commit_sha}''`);
             const pullRequests = yield this._octokit.rest.repos.listPullRequestsAssociatedWithCommit({
                 owner,
                 repo,

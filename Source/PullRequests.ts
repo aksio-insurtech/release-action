@@ -13,7 +13,7 @@ export class PullRequests implements IPullRequests {
         const repo = this._context.repo.repo;
         const sha = this._context.sha;
 
-        this._logger.debug(`Getting merged pull request for: '${sha}''`);
+        this._logger.info(`Getting merged pull request for: '${sha}''`);
 
         const mergedPullRequest = await this._octokit.paginate(
             this._octokit.pulls.list,
@@ -34,7 +34,7 @@ export class PullRequests implements IPullRequests {
         const repo = this._context.repo.repo;
         const commit_sha = this._context.sha;
 
-        this._logger.debug(`Getting open pull request for: '${commit_sha}''`);
+        this._logger.info(`Getting open pull request for: '${commit_sha}''`);
 
         const pullRequests = await this._octokit.rest.repos.listPullRequestsAssociatedWithCommit({
             owner,
