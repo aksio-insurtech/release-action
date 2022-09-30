@@ -31901,7 +31901,7 @@ class PullRequests {
             const owner = this._context.repo.owner;
             const repo = this._context.repo.repo;
             const commit_sha = this._context.sha;
-            this._logger.info(`Getting open pull request for: '${commit_sha}''`);
+            this._logger.info(`Getting open pull request for: '${commit_sha}' - ${this._context.ref}`);
             const pullRequests = yield this._octokit.rest.repos.listPullRequestsAssociatedWithCommit({
                 owner,
                 repo,

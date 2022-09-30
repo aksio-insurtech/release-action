@@ -34,7 +34,8 @@ export class PullRequests implements IPullRequests {
         const repo = this._context.repo.repo;
         const commit_sha = this._context.sha;
 
-        this._logger.info(`Getting open pull request for: '${commit_sha}''`);
+        this._logger.info(`Getting open pull request for: '${commit_sha}' - ${this._context.ref}`);
+        
 
         const pullRequests = await this._octokit.rest.repos.listPullRequestsAssociatedWithCommit({
             owner,
