@@ -31822,7 +31822,7 @@ class HandleVersion {
                 let pullRequest = yield this._pullRequests.getMergedPullRequest();
                 if (!pullRequest) {
                     logging_1.logger.info('No merged PR found. Trying open pull request for current sha.');
-                    pullRequest = yield this._pullRequests.getPullRequestForCurrentSha();
+                    pullRequest = yield this._pullRequests.getCurrentPullRequest();
                     if (!pullRequest) {
                         logging_1.logger.error('No PR found.');
                         return;
@@ -31896,24 +31896,25 @@ class PullRequests {
             return mergedPullRequest;
         });
     }
-    getPullRequestForCurrentSha() {
+    getCurrentPullRequest() {
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
             const owner = this._context.repo.owner;
             const repo = this._context.repo.repo;
-            const commit_sha = this._context.sha;
-            this._logger.info(`Getting open pull request for: '${commit_sha}' - ${this._context.ref}`);
-            const pullRequests = yield this._octokit.rest.repos.listPullRequestsAssociatedWithCommit({
+            const pull_number = ((_a = this._context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.number) || undefined;
+            if (!pull_number) {
+                this._logger.info(`No pull request number associated`);
+                return undefined;
+            }
+            this._logger.info(`Getting pull request '${pull_number}`);
+            const pullRequest = yield this._octokit.paginate(this._octokit.pulls.list, {
                 owner,
                 repo,
-                commit_sha
-            });
-            this._logger.info(`# of pull requests associated with sha: ${pullRequests.data.length}`);
-            const filtered = pullRequests.data
-                .filter(({ state }) => state === 'open')
-                .filter(({ head }) => head.sha.startsWith(commit_sha));
-            if (filtered.length === 0)
-                return undefined;
-            return filtered[0];
+                state: 'closed',
+                sort: 'updated',
+                direction: 'desc'
+            }).then(data => data.find(pr => pr.number === pull_number));
+            return pullRequest;
         });
     }
 }

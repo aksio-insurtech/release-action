@@ -1,5 +1,6 @@
 import { Context } from '@actions/github/lib/context';
 import { Octokit } from '@octokit/rest';
+import { pathToFileURL } from 'url';
 import winston from 'winston';
 import { IPullRequests } from './IPullRequests';
 import { PullRequest } from './PullRequest';
@@ -29,28 +30,29 @@ export class PullRequests implements IPullRequests {
         return mergedPullRequest;
     }
 
-    async getPullRequestForCurrentSha(): Promise<PullRequest | undefined> {
+    async getCurrentPullRequest(): Promise<PullRequest | undefined> {
         const owner = this._context.repo.owner;
         const repo = this._context.repo.repo;
-        const commit_sha = this._context.sha;
+        const pull_number = this._context.payload.pull_request?.number || undefined;
 
-        this._logger.info(`Getting open pull request for: '${commit_sha}' - ${this._context.ref}`);
-        
+        if (!pull_number) {
+            this._logger.info(`No pull request number associated`);
+            return undefined;
+        }
 
-        const pullRequests = await this._octokit.rest.repos.listPullRequestsAssociatedWithCommit({
-            owner,
-            repo,
-            commit_sha
-        });
+        this._logger.info(`Getting pull request '${pull_number}`);
 
-        this._logger.info(`# of pull requests associated with sha: ${pullRequests.data.length}`);
+        const pullRequest = await this._octokit.paginate(
+            this._octokit.pulls.list,
+            {
+                owner,
+                repo,
+                state: 'closed',
+                sort: 'updated',
+                direction: 'desc'
+            }
+        ).then(data => data.find(pr => pr.number === pull_number));
 
-        const filtered = pullRequests.data
-            .filter(({state}) => state === 'open')
-            .filter(({head}) => head.sha.startsWith(commit_sha));
-
-        if( filtered.length === 0) return undefined;
-
-        return filtered[0];
+        return pullRequest;
     }
 }

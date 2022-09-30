@@ -24,7 +24,7 @@ export class HandleVersion {
             let pullRequest = await this._pullRequests.getMergedPullRequest();
             if (!pullRequest) {
                 logger.info('No merged PR found. Trying open pull request for current sha.');
-                pullRequest = await this._pullRequests.getPullRequestForCurrentSha();
+                pullRequest = await this._pullRequests.getCurrentPullRequest();
                 if (!pullRequest) {
                     logger.error('No PR found.');
                     return;
