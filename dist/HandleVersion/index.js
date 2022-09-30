@@ -32141,13 +32141,18 @@ class Versions {
                     latestTag = latestTag.substring(1);
                 }
                 this._logger.info(`Latest tag: ${latestTag}`);
-                version = semver_1.default.parse(latestTag);
+                if (this._context.eventName === 'closed') {
+                    version = semver_1.default.parse(latestTag);
+                }
+                else {
+                    version = semver_1.default.parse(`${latestTag}-${preRelease}`);
+                }
             }
             if (!version) {
                 this._logger.error(`Version string '${version}' is not in a valid format`);
                 return VersionInfo_1.VersionInfo.invalid;
             }
-            if (this._context.eventName == 'closed') {
+            if (this._context.eventName === 'closed') {
                 isMajor = pullRequest.labels.some(_ => _.name === 'major');
                 if (!isMajor) {
                     isMinor = pullRequest.labels.some(_ => _.name === 'minor');
@@ -32170,7 +32175,7 @@ class Versions {
                 if (isPatch)
                     version = version.inc('patch') || version;
             }
-            this._logger.info(`New version is '${version.version}''`);
+            this._logger.info(`New version is '${version.version}'`);
             return new VersionInfo_1.VersionInfo(version, isMajor, isMinor, isPatch, true, version.prerelease.length > 0, true);
         });
     }

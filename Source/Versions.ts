@@ -40,7 +40,11 @@ export class Versions implements IVersions {
             }
             this._logger.info(`Latest tag: ${latestTag}`);
 
-            version = semver.parse(latestTag);
+            if( this._context.eventName === 'closed' ) {
+                version = semver.parse(latestTag);
+            } else {
+                version = semver.parse(`${latestTag}-${preRelease}`);
+            }
         }
 
         if (!version) {
@@ -48,7 +52,7 @@ export class Versions implements IVersions {
             return VersionInfo.invalid;
         }
 
-        if (this._context.eventName == 'closed') {
+        if (this._context.eventName === 'closed') {
             isMajor = pullRequest.labels.some(_ => _.name === 'major');
             if (!isMajor) {
                 isMinor = pullRequest.labels.some(_ => _.name === 'minor');
@@ -72,7 +76,7 @@ export class Versions implements IVersions {
             if (isPatch) version = version.inc('patch') || version;
         }
 
-        this._logger.info(`New version is '${version.version}''`);
+        this._logger.info(`New version is '${version.version}'`);
 
         return new VersionInfo(version, isMajor, isMinor, isPatch, true, version.prerelease.length > 0, true);
     }
