@@ -40,7 +40,7 @@ export class PullRequests implements IPullRequests {
             return undefined;
         }
 
-        this._logger.info(`Getting pull request '${pull_number}`);
+        this._logger.info(`Getting pull request '${pull_number}'`);
 
         const pullRequest = await this._octokit.paginate(
             this._octokit.pulls.list,
@@ -52,6 +52,10 @@ export class PullRequests implements IPullRequests {
                 direction: 'desc'
             }
         ).then(data => data.find(pr => pr.number === pull_number));
+
+        if (!pullRequest) {
+            this._logger.info(`There is no open PR with number '${pull_number}'`);
+        }
 
         return pullRequest;
     }

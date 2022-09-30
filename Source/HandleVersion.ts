@@ -21,6 +21,7 @@ export class HandleVersion {
     async run(): Promise<void> {
         try {
             outputs.setPrerelease(false);
+            outputs.setShouldPublish(false);
             let pullRequest = await this._pullRequests.getMergedPullRequest();
             if (!pullRequest) {
                 logger.info('No merged PR found. Trying open pull request for current sha.');
@@ -36,8 +37,6 @@ export class HandleVersion {
                     logger.info('Labels associated with PR:');
                     pullRequest.labels.forEach(_ => logger.info(`  - ${_}`));
                 }
-                outputs.setShouldPublish(false);
-                return;
             }
 
             const version = await this._versions.getNextVersionFor(pullRequest);

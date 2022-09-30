@@ -36265,7 +36265,7 @@ class PullRequests {
                 this._logger.info(`No pull request number associated`);
                 return undefined;
             }
-            this._logger.info(`Getting pull request '${pull_number}`);
+            this._logger.info(`Getting pull request '${pull_number}'`);
             const pullRequest = yield this._octokit.paginate(this._octokit.pulls.list, {
                 owner,
                 repo,
@@ -36273,6 +36273,9 @@ class PullRequests {
                 sort: 'updated',
                 direction: 'desc'
             }).then(data => data.find(pr => pr.number === pull_number));
+            if (!pullRequest) {
+                this._logger.info(`There is no open PR with number '${pull_number}'`);
+            }
             return pullRequest;
         });
     }

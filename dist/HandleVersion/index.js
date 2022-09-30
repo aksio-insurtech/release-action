@@ -31819,6 +31819,7 @@ class HandleVersion {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 outputs_1.default.setPrerelease(false);
+                outputs_1.default.setShouldPublish(false);
                 let pullRequest = yield this._pullRequests.getMergedPullRequest();
                 if (!pullRequest) {
                     logging_1.logger.info('No merged PR found. Trying open pull request for current sha.');
@@ -31834,8 +31835,6 @@ class HandleVersion {
                         logging_1.logger.info('Labels associated with PR:');
                         pullRequest.labels.forEach(_ => logging_1.logger.info(`  - ${_}`));
                     }
-                    outputs_1.default.setShouldPublish(false);
-                    return;
                 }
                 const version = yield this._versions.getNextVersionFor(pullRequest);
                 if (!version)
@@ -31906,7 +31905,7 @@ class PullRequests {
                 this._logger.info(`No pull request number associated`);
                 return undefined;
             }
-            this._logger.info(`Getting pull request '${pull_number}`);
+            this._logger.info(`Getting pull request '${pull_number}'`);
             const pullRequest = yield this._octokit.paginate(this._octokit.pulls.list, {
                 owner,
                 repo,
@@ -31914,6 +31913,9 @@ class PullRequests {
                 sort: 'updated',
                 direction: 'desc'
             }).then(data => data.find(pr => pr.number === pull_number));
+            if (!pullRequest) {
+                this._logger.info(`There is no open PR with number '${pull_number}'`);
+            }
             return pullRequest;
         });
     }
