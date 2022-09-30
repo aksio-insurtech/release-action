@@ -20,7 +20,7 @@ export class HandleVersion {
 
     async run(): Promise<void> {
         try {
-            logger.info(`Event that triggered: '${context.eventName}'`);
+            logger.info(`Event that triggered: '${JSON.stringify(context)}'`);
 
             outputs.setPrerelease(false);
             outputs.setShouldPublish(false);
