@@ -28,4 +28,25 @@ export class PullRequests implements IPullRequests {
 
         return mergedPullRequest;
     }
+
+    async getPullRequestForCurrentSha(): Promise<PullRequest | undefined> {
+        const owner = this._context.repo.owner;
+        const repo = this._context.repo.repo;
+        const sha = this._context.sha;
+
+        this._logger.debug(`Getting open pull request for: '${sha}''`);
+
+        const openPullRequest = await this._octokit.paginate(
+            this._octokit.pulls.list,
+            {
+                owner,
+                repo,
+                state: 'open',
+                sort: 'updated',
+                direction: 'desc'
+            }
+        ).then(data => data.find(pr => pr.head.sha === sha));
+
+        return openPullRequest;
+    }
 }

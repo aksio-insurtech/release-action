@@ -21,10 +21,13 @@ export class HandleVersion {
     async run(): Promise<void> {
         try {
             outputs.setPrerelease(false);
-            const pullRequest = await this._pullRequests.getMergedPullRequest();
+            let pullRequest = await this._pullRequests.getMergedPullRequest();
             if (!pullRequest) {
-                logger.error('No merged PR found.');
-                return;
+                pullRequest = await this._pullRequests.getPullRequestForCurrentSha();
+                if (!pullRequest) {
+                    logger.error('No merged PR found.');
+                    return;
+                }
             }
             if (!pullRequest.labels || pullRequest.labels.length === 0) {
                 logger.info('No release labels found.');

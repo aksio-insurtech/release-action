@@ -31819,10 +31819,13 @@ class HandleVersion {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 outputs_1.default.setPrerelease(false);
-                const pullRequest = yield this._pullRequests.getMergedPullRequest();
+                let pullRequest = yield this._pullRequests.getMergedPullRequest();
                 if (!pullRequest) {
-                    logging_1.logger.error('No merged PR found.');
-                    return;
+                    pullRequest = yield this._pullRequests.getPullRequestForCurrentSha();
+                    if (!pullRequest) {
+                        logging_1.logger.error('No merged PR found.');
+                        return;
+                    }
                 }
                 if (!pullRequest.labels || pullRequest.labels.length === 0) {
                     logging_1.logger.info('No release labels found.');
@@ -31890,6 +31893,22 @@ class PullRequests {
                 direction: 'desc'
             }).then(data => data.find(pr => pr.merge_commit_sha === sha));
             return mergedPullRequest;
+        });
+    }
+    getPullRequestForCurrentSha() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const owner = this._context.repo.owner;
+            const repo = this._context.repo.repo;
+            const sha = this._context.sha;
+            this._logger.debug(`Getting open pull request for: '${sha}''`);
+            const openPullRequest = yield this._octokit.paginate(this._octokit.pulls.list, {
+                owner,
+                repo,
+                state: 'open',
+                sort: 'updated',
+                direction: 'desc'
+            }).then(data => data.find(pr => pr.head.sha === sha));
+            return openPullRequest;
         });
     }
 }

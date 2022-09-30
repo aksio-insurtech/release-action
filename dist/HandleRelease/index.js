@@ -36255,6 +36255,22 @@ class PullRequests {
             return mergedPullRequest;
         });
     }
+    getPullRequestForCurrentSha() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const owner = this._context.repo.owner;
+            const repo = this._context.repo.repo;
+            const sha = this._context.sha;
+            this._logger.debug(`Getting open pull request for: '${sha}''`);
+            const openPullRequest = yield this._octokit.paginate(this._octokit.pulls.list, {
+                owner,
+                repo,
+                state: 'open',
+                sort: 'updated',
+                direction: 'desc'
+            }).then(data => data.find(pr => pr.head.sha === sha));
+            return openPullRequest;
+        });
+    }
 }
 exports.PullRequests = PullRequests;
 
