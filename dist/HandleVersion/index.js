@@ -31818,6 +31818,7 @@ class HandleVersion {
     run() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                logging_1.logger.info(`Event that triggered: '${github_1.context.eventName}'`);
                 outputs_1.default.setPrerelease(false);
                 outputs_1.default.setShouldPublish(false);
                 let pullRequest = yield this._pullRequests.getMergedPullRequest();
