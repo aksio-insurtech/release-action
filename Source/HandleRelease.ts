@@ -23,7 +23,7 @@ export class HandleRelease {
         if (!pullRequest) return;
 
         const version = await this._versions.getNextVersionFor(pullRequest);
-        if (!version) return;
+        if (!version || version.isPrerelease) return;
 
         logger.info(`Create release for version '${version.version}'`);
 

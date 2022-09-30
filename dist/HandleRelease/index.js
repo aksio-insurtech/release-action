@@ -36188,7 +36188,7 @@ class HandleRelease {
             if (!pullRequest)
                 return;
             const version = yield this._versions.getNextVersionFor(pullRequest);
-            if (!version)
+            if (!version || version.isPrerelease)
                 return;
             logging_1.logger.info(`Create release for version '${version.version}'`);
             // GitHub Create Release documentation: https://developer.github.com/v3/repos/releases/#create-a-release
