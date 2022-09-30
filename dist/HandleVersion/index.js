@@ -31821,9 +31821,10 @@ class HandleVersion {
                 outputs_1.default.setPrerelease(false);
                 let pullRequest = yield this._pullRequests.getMergedPullRequest();
                 if (!pullRequest) {
+                    logging_1.logger.info('No merged PR found. Trying open pull request for current sha.');
                     pullRequest = yield this._pullRequests.getPullRequestForCurrentSha();
                     if (!pullRequest) {
-                        logging_1.logger.error('No merged PR found.');
+                        logging_1.logger.error('No PR found.');
                         return;
                     }
                 }
