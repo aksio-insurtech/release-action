@@ -31907,6 +31907,7 @@ class PullRequests {
                 repo,
                 commit_sha
             });
+            this._logger.info(`# of pull requests associated with sha: ${pullRequests.data.length}`);
             const filtered = pullRequests.data
                 .filter(({ state }) => state === 'open')
                 .filter(({ head }) => head.sha.startsWith(commit_sha));
