@@ -19,7 +19,8 @@ describe("when getting next version and branch is a semantic version number", as
         html_url: '',
         number: 42,
         base: { ref: '' },
-        head: { ref: '6.4.3' }
+        head: { ref: '6.4.3' },
+        state: 'open'
     };
 
     const version = await versions.getNextVersionFor(pullRequest);

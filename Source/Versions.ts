@@ -40,7 +40,7 @@ export class Versions implements IVersions {
             }
             this._logger.info(`Latest tag: ${latestTag}`);
 
-            if( this._context.eventName === 'closed' ) {
+            if (pullRequest.state === 'closed') {
                 version = semver.parse(latestTag);
             } else {
                 version = semver.parse(`${latestTag}-${preRelease}`);
@@ -52,7 +52,7 @@ export class Versions implements IVersions {
             return VersionInfo.invalid;
         }
 
-        if (this._context.eventName === 'closed') {
+        if (pullRequest.state === 'closed') {
             isMajor = pullRequest.labels.some(_ => _.name === 'major');
             if (!isMajor) {
                 isMinor = pullRequest.labels.some(_ => _.name === 'minor');

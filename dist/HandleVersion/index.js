@@ -31818,7 +31818,6 @@ class HandleVersion {
     run() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                logging_1.logger.info(`Event that triggered: '${JSON.stringify(github_1.context)}'`);
                 outputs_1.default.setPrerelease(false);
                 outputs_1.default.setShouldPublish(false);
                 let pullRequest = yield this._pullRequests.getMergedPullRequest();
@@ -32142,7 +32141,7 @@ class Versions {
                     latestTag = latestTag.substring(1);
                 }
                 this._logger.info(`Latest tag: ${latestTag}`);
-                if (this._context.eventName === 'closed') {
+                if (pullRequest.state === 'closed') {
                     version = semver_1.default.parse(latestTag);
                 }
                 else {
@@ -32153,7 +32152,7 @@ class Versions {
                 this._logger.error(`Version string '${version}' is not in a valid format`);
                 return VersionInfo_1.VersionInfo.invalid;
             }
-            if (this._context.eventName === 'closed') {
+            if (pullRequest.state === 'closed') {
                 isMajor = pullRequest.labels.some(_ => _.name === 'major');
                 if (!isMajor) {
                     isMinor = pullRequest.labels.some(_ => _.name === 'minor');

@@ -14,4 +14,5 @@ export type PullRequest = {
     number: number;
     base: Branch;
     head: Branch;
+    state: string;
 };

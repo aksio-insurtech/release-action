@@ -3,15 +3,14 @@ import sinon from 'sinon';
 import { PullRequest } from '../PullRequest';
 import fakeLogger from '../fakeLogger';
 import { ITags } from '../ITags';
-import { a_closed_event } from './given/a_closed_event';
+import fakeContext from '../fakeContext';
 
 describe("when getting next version that should not release", async () => {
     const fakeTags: ITags = {
         getLatestTag: sinon.stub().returns('v1.0.0')
     };
 
-    const context = new a_closed_event();
-    const versions = new Versions(sinon.stub() as any, context.context, fakeTags, fakeLogger);
+    const versions = new Versions(sinon.stub() as any, fakeContext(), fakeTags, fakeLogger);
     const pullRequest: PullRequest = {
         labels: [],
         body: '',
@@ -19,7 +18,8 @@ describe("when getting next version that should not release", async () => {
         html_url: '',
         number: 42,
         base: { ref: '' },
-        head: { ref: '' }
+        head: { ref: '' },
+        state: 'closed'
     };
 
     const version = await versions.getNextVersionFor(pullRequest);

@@ -18,7 +18,8 @@ describe("when getting next version and latest tag is not a valid semver", async
         html_url: '',
         number: 42,
         base: { ref: '' },
-        head: { ref: '' }
+        head: { ref: '' },
+        state: 'open'
     };
 
     const version = await versions.getNextVersionFor(pullRequest);
