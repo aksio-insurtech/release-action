@@ -8,23 +8,23 @@ import { IVersions } from './IVersions';
 import { VersionInfo } from './VersionInfo';
 import { ITags } from './ITags';
 
+
 export class Versions implements IVersions {
     constructor(readonly _octokit: Octokit, readonly _context: Context, readonly _tags: ITags, readonly _logger: winston.Logger) {
     }
 
     async getNextVersionFor(pullRequest: PullRequest): Promise<VersionInfo> {
-        const preRelease = `pr${pullRequest.number}.${this._context.sha.substring(0, 7)}`;
         let isMajor = false;
         let isMinor = false;
         let isPatch = false;
 
         let version = semver.parse(pullRequest.head.ref);
         if (version) {
-            version = new SemVer(`${version.major}.${version.minor}.${version.patch}-${preRelease}`);
+            version = this.getActualVersion(version, pullRequest);
         } else {
             version = semver.parse(pullRequest.base.ref);
             if (version) {
-                version = new SemVer(`${version.major}.${version.minor}.${version.patch}-${preRelease}`);
+                version = this.getActualVersion(version, pullRequest);
             }
         }
 
@@ -43,7 +43,7 @@ export class Versions implements IVersions {
             if (pullRequest.state === 'closed') {
                 version = semver.parse(latestTag);
             } else {
-                version = semver.parse(`${latestTag}-${preRelease}`);
+                version = semver.parse(`${latestTag}-${this.getPullRequestPrerelease(pullRequest)}`);
             }
         }
 
@@ -79,5 +79,21 @@ export class Versions implements IVersions {
         this._logger.info(`New version is '${version.version}'`);
 
         return new VersionInfo(version, isMajor, isMinor, isPatch, true, version.prerelease.length > 0, true);
+    }
+
+    private getActualVersion(version: semver.SemVer, pullRequest: PullRequest) {
+        if (version.prerelease.length == 0) {
+            return new SemVer(`${version.major}.${version.minor}.${version.patch}-${this.getPullRequestPrerelease(pullRequest)}`);
+        } else {
+            return new SemVer(`${version.major}.${version.minor}.${version.patch}-${version.prerelease[0]}.${this.sha}`);
+        }
+    }
+
+    private getPullRequestPrerelease(pullRequest: PullRequest) {
+        return `pr${pullRequest.number}.${this.sha}`;
+    }
+
+    private get sha() {
+        return this._context.sha.substring(0, 7);
     }
 }

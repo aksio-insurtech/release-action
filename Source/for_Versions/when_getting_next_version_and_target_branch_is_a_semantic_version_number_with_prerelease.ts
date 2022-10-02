@@ -5,7 +5,7 @@ import fakeLogger from '../fakeLogger';
 import fakeContext from '../fakeContext';
 import { ITags } from '../ITags';
 
-describe("when getting next version and branch is a semantic version number", async () => {
+describe("when getting next version and target branch is a semantic version number with prerelease", async () => {
     const fakeTags: ITags = {
         getLatestTag: sinon.stub().returns('1.2.3')
     };
@@ -18,8 +18,8 @@ describe("when getting next version and branch is a semantic version number", as
         url: '',
         html_url: '',
         number: 42,
-        base: { ref: '' },
-        head: { ref: '6.4.3' },
+        base: { ref: '6.4.3-alpha' },
+        head: { ref: '' },
         state: 'open'
     };
 
@@ -27,5 +27,5 @@ describe("when getting next version and branch is a semantic version number", as
 
     it('should set release to true', () => version.isRelease.should.be.true);
     it('should be a prerelease', () => version.isPrerelease.should.be.true);
-    it('should create correct version', () => version.version.raw.should.equal('6.4.3-pr42.cf05d51'));
+    it('should create correct version', () => version.version.raw.should.equal('6.4.3-alpha.cf05d51'));
 });

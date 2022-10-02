@@ -36481,18 +36481,17 @@ class Versions {
     }
     getNextVersionFor(pullRequest) {
         return __awaiter(this, void 0, void 0, function* () {
-            const preRelease = `pr${pullRequest.number}.${this._context.sha.substring(0, 7)}`;
             let isMajor = false;
             let isMinor = false;
             let isPatch = false;
             let version = semver_1.default.parse(pullRequest.head.ref);
             if (version) {
-                version = new semver_1.SemVer(`${version.major}.${version.minor}.${version.patch}-${preRelease}`);
+                version = this.getActualVersion(version, pullRequest);
             }
             else {
                 version = semver_1.default.parse(pullRequest.base.ref);
                 if (version) {
-                    version = new semver_1.SemVer(`${version.major}.${version.minor}.${version.patch}-${preRelease}`);
+                    version = this.getActualVersion(version, pullRequest);
                 }
             }
             if (!version) {
@@ -36505,7 +36504,7 @@ class Versions {
                     version = semver_1.default.parse(latestTag);
                 }
                 else {
-                    version = semver_1.default.parse(`${latestTag}-${preRelease}`);
+                    version = semver_1.default.parse(`${latestTag}-${this.getPullRequestPrerelease(pullRequest)}`);
                 }
             }
             if (!version) {
@@ -36538,6 +36537,20 @@ class Versions {
             this._logger.info(`New version is '${version.version}'`);
             return new VersionInfo_1.VersionInfo(version, isMajor, isMinor, isPatch, true, version.prerelease.length > 0, true);
         });
+    }
+    getActualVersion(version, pullRequest) {
+        if (version.prerelease.length == 0) {
+            return new semver_1.SemVer(`${version.major}.${version.minor}.${version.patch}-${this.getPullRequestPrerelease(pullRequest)}`);
+        }
+        else {
+            return new semver_1.SemVer(`${version.major}.${version.minor}.${version.patch}-${version.prerelease[0]}.${this.sha}`);
+        }
+    }
+    getPullRequestPrerelease(pullRequest) {
+        return `pr${pullRequest.number}.${this.sha}`;
+    }
+    get sha() {
+        return this._context.sha.substring(0, 7);
     }
 }
 exports.Versions = Versions;
