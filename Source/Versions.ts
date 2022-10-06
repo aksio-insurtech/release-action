@@ -17,13 +17,16 @@ export class Versions implements IVersions {
         let isMajor = false;
         let isMinor = false;
         let isPatch = false;
+        let isIsolatedForPullRequest = false;
 
         let version = semver.parse(pullRequest.head.ref);
         if (version) {
+            isIsolatedForPullRequest = version.prerelease.length !== 0;
             version = this.getActualVersion(version, pullRequest);
         } else {
             version = semver.parse(pullRequest.base.ref);
             if (version) {
+                isIsolatedForPullRequest = version.prerelease.length !== 0;
                 version = this.getActualVersion(version, pullRequest);
             }
         }
@@ -78,7 +81,7 @@ export class Versions implements IVersions {
 
         this._logger.info(`New version is '${version.version}'`);
 
-        return new VersionInfo(version, isMajor, isMinor, isPatch, true, version.prerelease.length > 0, true);
+        return new VersionInfo(version, isMajor, isMinor, isPatch, true, version.prerelease.length > 0, isIsolatedForPullRequest, true);
     }
 
     private getActualVersion(version: semver.SemVer, pullRequest: PullRequest) {

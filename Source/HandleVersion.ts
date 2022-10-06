@@ -21,6 +21,7 @@ export class HandleVersion {
     async run(): Promise<void> {
         try {
             outputs.setPrerelease(false);
+            outputs.setIsolatedForPullRequest(false);
             outputs.setShouldPublish(false);
             let pullRequest = await this._pullRequests.getMergedPullRequest();
             if (!pullRequest) {
@@ -45,6 +46,7 @@ export class HandleVersion {
             outputs.setVersion(version.version.version);
             outputs.setShouldPublish(true);
             outputs.setPrerelease(version.isPrerelease);
+            outputs.setIsolatedForPullRequest(version.isIsolatedForPullRequest);
         } catch (ex) {
             logger.error("Something went wrong");
             logger.error(ex);

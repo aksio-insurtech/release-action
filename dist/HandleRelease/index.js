@@ -36188,7 +36188,7 @@ class HandleRelease {
             if (!pullRequest)
                 return;
             const version = yield this._versions.getNextVersionFor(pullRequest);
-            if (!version || version.isPrerelease)
+            if (!version || version.isPrerelease || !version.version)
                 return;
             logging_1.logger.info(`Create release for version '${version.version}'`);
             // GitHub Create Release documentation: https://developer.github.com/v3/repos/releases/#create-a-release
@@ -36414,19 +36414,20 @@ exports.Tags = Tags;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.VersionInfo = void 0;
 class VersionInfo {
-    constructor(version, isMajor, isMinor, isPatch, isRelease, isPrerelease, isValid) {
+    constructor(version, isMajor, isMinor, isPatch, isRelease, isPrerelease, isIsolatedForPullRequest, isValid) {
         this.version = version;
         this.isMajor = isMajor;
         this.isMinor = isMinor;
         this.isPatch = isPatch;
         this.isRelease = isRelease;
         this.isPrerelease = isPrerelease;
+        this.isIsolatedForPullRequest = isIsolatedForPullRequest;
         this.isValid = isValid;
     }
 }
 exports.VersionInfo = VersionInfo;
-VersionInfo.invalid = new VersionInfo(undefined, false, false, false, false, false, false);
-VersionInfo.noRelease = new VersionInfo(undefined, false, false, false, false, false, true);
+VersionInfo.invalid = new VersionInfo(undefined, false, false, false, false, false, false, false);
+VersionInfo.noRelease = new VersionInfo(undefined, false, false, false, false, false, false, true);
 
 
 /***/ }),
@@ -36484,13 +36485,16 @@ class Versions {
             let isMajor = false;
             let isMinor = false;
             let isPatch = false;
+            let isIsolatedForPullRequest = false;
             let version = semver_1.default.parse(pullRequest.head.ref);
             if (version) {
+                isIsolatedForPullRequest = version.prerelease.length !== 0;
                 version = this.getActualVersion(version, pullRequest);
             }
             else {
                 version = semver_1.default.parse(pullRequest.base.ref);
                 if (version) {
+                    isIsolatedForPullRequest = version.prerelease.length !== 0;
                     version = this.getActualVersion(version, pullRequest);
                 }
             }
@@ -36535,7 +36539,7 @@ class Versions {
                     version = version.inc('patch') || version;
             }
             this._logger.info(`New version is '${version.version}'`);
-            return new VersionInfo_1.VersionInfo(version, isMajor, isMinor, isPatch, true, version.prerelease.length > 0, true);
+            return new VersionInfo_1.VersionInfo(version, isMajor, isMinor, isPatch, true, version.prerelease.length > 0, isIsolatedForPullRequest, true);
         });
     }
     getActualVersion(version, pullRequest) {

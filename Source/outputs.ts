@@ -11,5 +11,9 @@ export default {
 
     setPrerelease(value: boolean) {
         setOutput('prerelease', value);
+    },
+
+    setIsolatedForPullRequest(value: boolean) {
+        setOutput('isolated-for-pull-request', value);
     }
 };

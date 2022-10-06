@@ -22,14 +22,21 @@ basis for a version number and generate a prerelease version number based on the
 <major>.<minor>.<patch>-PR<number>.<short sha>.
 
 Similar if the target branch has a name that is a semantic version number, it will use this to form a prerelease version number.
+The output property `isolated-for-pull-request` will be set to true.
+
+If any of the branch names happen to be a semantic version number with a prerelease included in it, it will produce a version number
+based on the full version and just adding the short sha of the commit at the end. In this case the output property `isolated-for-pull-request` will be set to false.
 
 This behavior can be useful for building artifacts that is linked to a pull request and one wants to test them out before they are actually
 merged down to the target branch.
 
-It runs the following steps:
+The action is running a **main** stage and a post stage. The **main** stage runs the following steps.
 
 * Establishes the context by looking at the GitHub context in which the action is running in. Decides if this is a publishable build.
 * Increments the version by looking at the latest version tag of the repository and increases according to what the context decided the build type was.
+
+The post stage is only running if successful and runs the following steps:
+
 * Prepends to the CHANGELOG.md file in the repository with the content of the description.
 * Releases a snapshot of the source code to GitHub releases with the calculated version number.
 
@@ -94,6 +101,7 @@ jobs:
 
 | Property | Description |
 | -------- | ----------- |
-| should-publish | Whether or not a publish should be done |
+| should-publish | Boolean telling whether or not a publish should be done |
 | version | Version number to publish with |
-| prerelease | Whether or not a it is a prerelease |
+| prerelease | Boolean telling whether or not a it is a prerelease |
+| isolated-for-pull-request | Boolean telling whether or not it should be an isolated release for the pull request only |
