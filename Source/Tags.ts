@@ -45,9 +45,9 @@ export class Tags implements ITags {
             const [latestTag] = tags.slice(-1);
             return latestTag;
         } catch (ex) {
-            logger.error(`Couldn't get latest tag`);
-            logger.error(ex);
-            return '';
+            logger.warning(`Couldn't get latest tag - defaulting to v0.0.0 (could be the first time this is run on the repo)`);
+            logger.warning(ex);
+            return 'v0.0.0';
         }
     }
 
