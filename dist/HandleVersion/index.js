@@ -32016,9 +32016,9 @@ class Tags {
                 return latestTag;
             }
             catch (ex) {
-                logging_1.logger.error(`Couldn't get latest tag`);
-                logging_1.logger.error(ex);
-                return '';
+                logging_1.logger.warning(`Couldn't get latest tag - defaulting to v0.0.0 (could be the first time this is run on the repo)`);
+                logging_1.logger.warning(ex);
+                return 'v0.0.0';
             }
         });
     }
