@@ -36321,7 +36321,6 @@ var __asyncGenerator = (this && this.__asyncGenerator) || function (thisArg, _ar
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Tags = void 0;
 const tag_cmp_1 = __nccwpck_require__(1710);
-const logging_1 = __nccwpck_require__(1938);
 class Tags {
     constructor(_octokit, _context, _logger) {
         this._octokit = _octokit;
@@ -36374,8 +36373,8 @@ class Tags {
                 return latestTag;
             }
             catch (ex) {
-                logging_1.logger.warning(`Couldn't get latest tag - defaulting to v0.0.0 (could be the first time this is run on the repo)`);
-                logging_1.logger.warning(ex);
+                this._logger.warn(`Couldn't get latest tag - defaulting to v0.0.0 (could be the first time this is run on the repo)`);
+                this._logger.warn(ex);
                 return 'v0.0.0';
             }
         });
