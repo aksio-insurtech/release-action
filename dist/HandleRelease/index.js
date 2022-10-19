@@ -36507,6 +36507,9 @@ class Versions {
                     version = semver_1.default.parse(latestTag);
                 }
                 else {
+                    if (!pullRequest.draft) {
+                        return VersionInfo_1.VersionInfo.noRelease;
+                    }
                     version = semver_1.default.parse(`${latestTag}-${this.getPullRequestPrerelease(pullRequest)}`);
                 }
             }

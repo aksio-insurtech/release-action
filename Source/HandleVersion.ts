@@ -41,7 +41,7 @@ export class HandleVersion {
             }
 
             const version = await this._versions.getNextVersionFor(pullRequest);
-            if (!version) return;
+            if (!version || !version.isRelease) return;
 
             outputs.setVersion(version.version.version);
             outputs.setShouldPublish(true);

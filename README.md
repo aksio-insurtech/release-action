@@ -24,6 +24,9 @@ basis for a version number and generate a prerelease version number based on the
 Similar if the target branch has a name that is a semantic version number, it will use this to form a prerelease version number.
 The output property `isolated-for-pull-request` will be set to true.
 
+It will only generate a valid `PR` pre-release if the pull request is in draft. If the pull request is not in draft the `should-publish` will be
+set to `false` and there will be no version info in the `version` output.
+
 If any of the branch names happen to be a semantic version number with a prerelease included in it, it will produce a version number
 based on the full version and just adding the short sha of the commit at the end. In this case the output property `isolated-for-pull-request` will be set to false.
 

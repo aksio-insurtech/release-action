@@ -46,6 +46,9 @@ export class Versions implements IVersions {
             if (pullRequest.state === 'closed') {
                 version = semver.parse(latestTag);
             } else {
+                if (!pullRequest.draft) {
+                    return VersionInfo.noRelease;
+                }
                 version = semver.parse(`${latestTag}-${this.getPullRequestPrerelease(pullRequest)}`);
             }
         }

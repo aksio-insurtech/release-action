@@ -31838,7 +31838,7 @@ class HandleVersion {
                     }
                 }
                 const version = yield this._versions.getNextVersionFor(pullRequest);
-                if (!version)
+                if (!version || !version.isRelease)
                     return;
                 outputs_1.default.setVersion(version.version.version);
                 outputs_1.default.setShouldPublish(true);
@@ -32149,6 +32149,9 @@ class Versions {
                     version = semver_1.default.parse(latestTag);
                 }
                 else {
+                    if (!pullRequest.draft) {
+                        return VersionInfo_1.VersionInfo.noRelease;
+                    }
                     version = semver_1.default.parse(`${latestTag}-${this.getPullRequestPrerelease(pullRequest)}`);
                 }
             }

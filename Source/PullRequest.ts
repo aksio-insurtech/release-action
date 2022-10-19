@@ -15,4 +15,5 @@ export type PullRequest = {
     base: Branch;
     head: Branch;
     state: string;
+    draft?: boolean;
 };
