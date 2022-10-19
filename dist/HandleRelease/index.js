@@ -36508,6 +36508,7 @@ class Versions {
                 }
                 else {
                     if (!pullRequest.draft) {
+                        this._logger.info('Pull request is not in draft.');
                         return VersionInfo_1.VersionInfo.noRelease;
                     }
                     version = semver_1.default.parse(`${latestTag}-${this.getPullRequestPrerelease(pullRequest)}`);

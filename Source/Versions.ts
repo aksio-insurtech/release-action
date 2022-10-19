@@ -47,6 +47,7 @@ export class Versions implements IVersions {
                 version = semver.parse(latestTag);
             } else {
                 if (!pullRequest.draft) {
+                    this._logger.info('Pull request is not in draft.')
                     return VersionInfo.noRelease;
                 }
                 version = semver.parse(`${latestTag}-${this.getPullRequestPrerelease(pullRequest)}`);
