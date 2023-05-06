@@ -31809,6 +31809,8 @@ const outputs_1 = __importDefault(__nccwpck_require__(7338));
 const PullRequests_1 = __nccwpck_require__(1674);
 const Versions_1 = __nccwpck_require__(4895);
 const Tags_1 = __nccwpck_require__(3123);
+const semver_1 = __nccwpck_require__(1383);
+const VersionInfo_1 = __nccwpck_require__(3648);
 const octokit = new rest_1.Octokit({ auth: inputs_1.default.gitHubToken });
 class HandleVersion {
     constructor(_pullRequests, _versions) {
@@ -31818,28 +31820,36 @@ class HandleVersion {
     run() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                let version;
                 outputs_1.default.setPrerelease(false);
                 outputs_1.default.setIsolatedForPullRequest(false);
                 outputs_1.default.setShouldPublish(false);
-                let pullRequest = yield this._pullRequests.getMergedPullRequest();
-                if (!pullRequest) {
-                    logging_1.logger.info('No merged PR found. Trying open pull request for current sha.');
-                    pullRequest = yield this._pullRequests.getCurrentPullRequest();
+                if (!inputs_1.default.version || inputs_1.default.version === '') {
+                    let pullRequest = yield this._pullRequests.getMergedPullRequest();
                     if (!pullRequest) {
-                        logging_1.logger.error('No PR found.');
+                        logging_1.logger.info('No merged PR found. Trying open pull request for current sha.');
+                        pullRequest = yield this._pullRequests.getCurrentPullRequest();
+                        if (!pullRequest) {
+                            logging_1.logger.error('No PR found.');
+                            return;
+                        }
+                    }
+                    if (!pullRequest.labels || pullRequest.labels.length === 0) {
+                        logging_1.logger.info('No release labels found.');
+                        if (pullRequest.labels.length > 0) {
+                            logging_1.logger.info('Labels associated with PR:');
+                            pullRequest.labels.forEach(_ => logging_1.logger.info(`  - ${_}`));
+                        }
+                    }
+                    version = yield this._versions.getNextVersionFor(pullRequest);
+                    if (!version || !version.isRelease)
                         return;
-                    }
                 }
-                if (!pullRequest.labels || pullRequest.labels.length === 0) {
-                    logging_1.logger.info('No release labels found.');
-                    if (pullRequest.labels.length > 0) {
-                        logging_1.logger.info('Labels associated with PR:');
-                        pullRequest.labels.forEach(_ => logging_1.logger.info(`  - ${_}`));
-                    }
+                else {
+                    const semVer = new semver_1.SemVer(inputs_1.default.version);
+                    version = new VersionInfo_1.VersionInfo(semVer, false, false, false, true, semVer.prerelease.length !== 0, false, true);
+                    logging_1.logger.info('Using explicitly set version number');
                 }
-                const version = yield this._versions.getNextVersionFor(pullRequest);
-                if (!version || !version.isRelease)
-                    return;
                 outputs_1.default.setVersion(version.version.version);
                 outputs_1.default.setShouldPublish(true);
                 outputs_1.default.setPrerelease(version.isPrerelease);
