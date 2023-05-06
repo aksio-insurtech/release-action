@@ -28,7 +28,7 @@ export class HandleRelease {
         let associatedNumber = 0;
         let associatedLink = '';
 
-        if (inputs.version && inputs.version !== '') {
+        if (!inputs.version || inputs.version === '') {
             pullRequest = await this._pullRequests.getMergedPullRequest();
             if (!pullRequest) return;
 
@@ -42,6 +42,8 @@ export class HandleRelease {
             const semVer = new SemVer(inputs.version!);
             version = new VersionInfo(semVer, false, false, false, true, semVer.prerelease.length !== 0, false, true);
             releaseNotes = inputs.releaseNotes || '';
+            logger.info('Using explicitly set version number');
+            logger.info(`Release notes: ${releaseNotes}`);
         }
 
         logger.info(`Create release for version '${version.version}'`);

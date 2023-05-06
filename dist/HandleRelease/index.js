@@ -36191,7 +36191,7 @@ class HandleRelease {
             let releaseNotes;
             let associatedNumber = 0;
             let associatedLink = '';
-            if (inputs_1.default.version && inputs_1.default.version !== '') {
+            if (!inputs_1.default.version || inputs_1.default.version === '') {
                 pullRequest = yield this._pullRequests.getMergedPullRequest();
                 if (!pullRequest)
                     return;
@@ -36206,6 +36206,8 @@ class HandleRelease {
                 const semVer = new semver_1.SemVer(inputs_1.default.version);
                 version = new VersionInfo_1.VersionInfo(semVer, false, false, false, true, semVer.prerelease.length !== 0, false, true);
                 releaseNotes = inputs_1.default.releaseNotes || '';
+                logging_1.logger.info('Using explicitly set version number');
+                logging_1.logger.info(`Release notes: ${releaseNotes}`);
             }
             logging_1.logger.info(`Create release for version '${version.version}'`);
             // GitHub Create Release documentation: https://developer.github.com/v3/repos/releases/#create-a-release
