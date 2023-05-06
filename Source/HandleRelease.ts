@@ -10,6 +10,9 @@ import { IPullRequests } from './IPullRequests';
 import { PullRequests } from './PullRequests';
 import { IVersions } from './IVersions';
 import { Tags } from './Tags';
+import { PullRequest } from './PullRequest';
+import { VersionInfo } from './VersionInfo';
+import { SemVer } from 'semver';
 
 const octokit = new Octokit({ auth: inputs.gitHubToken });
 
@@ -19,11 +22,27 @@ export class HandleRelease {
     }
 
     async run(): Promise<void> {
-        const pullRequest = await this._pullRequests.getMergedPullRequest();
-        if (!pullRequest) return;
+        let pullRequest: PullRequest | undefined;
+        let version: VersionInfo | undefined;
+        let releaseNotes: string | undefined;
+        let associatedNumber = 0;
+        let associatedLink = '';
 
-        const version = await this._versions.getNextVersionFor(pullRequest);
-        if (!version || version.isPrerelease || !version.version) return;
+        if (inputs.version && inputs.version !== '') {
+            pullRequest = await this._pullRequests.getMergedPullRequest();
+            if (!pullRequest) return;
+
+            releaseNotes = pullRequest.body || '';
+            associatedNumber = pullRequest.number;
+            associatedLink = pullRequest.html_url;
+
+            version = await this._versions.getNextVersionFor(pullRequest);
+            if (!version || version.isPrerelease || !version.version) return;
+        } else {
+            const semVer = new SemVer(inputs.version!);
+            version = new VersionInfo(semVer, false, false, false, true, semVer.prerelease.length !== 0, false, true);
+            releaseNotes = inputs.releaseNotes || '';
+        }
 
         logger.info(`Create release for version '${version.version}'`);
 
@@ -35,7 +54,7 @@ export class HandleRelease {
             repo: this._context.repo.repo,
             tag_name: `v${version.version}`,
             name: `Release v${version.version}`,
-            body: pullRequest.body || '',
+            body: releaseNotes,
             prerelease: false,
             target_commitish: this._context.sha
         };
@@ -46,7 +65,7 @@ export class HandleRelease {
         await octokit.repos.createRelease(release);
         logger.info('GitHub release created');
 
-        await prependToChangeLog(pullRequest.body || '', `v${version.version}`, pullRequest.number, pullRequest.html_url);
+        await prependToChangeLog(releaseNotes, `v${version.version}`, associatedNumber, associatedLink);
         logger.info('Prepended to changelog');
     }
 }

@@ -99,6 +99,8 @@ jobs:
 | user-name | UserName to use for any Git actions, such as commit of the changelog | | X |
 | user-email | Email to associate with the UserName for any Git actions, such as commit of the changelog | | X |
 | github-token | The GitHub token to use for any GitHub actions | ${{ secrets.GITHUB_TOKEN }} | - |
+| version | Version number to use when creating the release. If there is a value and the value is not an empty string, it will override the logic of deducting the version number based on tags on the PR. |
+| release-notes | Release notes to use when creating the release. |
 
 ## Outputs
 

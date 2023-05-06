@@ -36175,6 +36175,8 @@ const changeLog_1 = __nccwpck_require__(5431);
 const Versions_1 = __nccwpck_require__(4895);
 const PullRequests_1 = __nccwpck_require__(1674);
 const Tags_1 = __nccwpck_require__(3123);
+const VersionInfo_1 = __nccwpck_require__(3648);
+const semver_1 = __nccwpck_require__(1383);
 const octokit = new rest_1.Octokit({ auth: inputs_1.default.gitHubToken });
 class HandleRelease {
     constructor(_pullRequests, _context, _versions) {
@@ -36184,12 +36186,27 @@ class HandleRelease {
     }
     run() {
         return __awaiter(this, void 0, void 0, function* () {
-            const pullRequest = yield this._pullRequests.getMergedPullRequest();
-            if (!pullRequest)
-                return;
-            const version = yield this._versions.getNextVersionFor(pullRequest);
-            if (!version || version.isPrerelease || !version.version)
-                return;
+            let pullRequest;
+            let version;
+            let releaseNotes;
+            let associatedNumber = 0;
+            let associatedLink = '';
+            if (inputs_1.default.version && inputs_1.default.version !== '') {
+                pullRequest = yield this._pullRequests.getMergedPullRequest();
+                if (!pullRequest)
+                    return;
+                releaseNotes = pullRequest.body || '';
+                associatedNumber = pullRequest.number;
+                associatedLink = pullRequest.html_url;
+                version = yield this._versions.getNextVersionFor(pullRequest);
+                if (!version || version.isPrerelease || !version.version)
+                    return;
+            }
+            else {
+                const semVer = new semver_1.SemVer(inputs_1.default.version);
+                version = new VersionInfo_1.VersionInfo(semVer, false, false, false, true, semVer.prerelease.length !== 0, false, true);
+                releaseNotes = inputs_1.default.releaseNotes || '';
+            }
             logging_1.logger.info(`Create release for version '${version.version}'`);
             // GitHub Create Release documentation: https://developer.github.com/v3/repos/releases/#create-a-release
             // GitHub Octokit Create Release documentation: https://octokit.github.io/rest.js/v18#repos-create-release
@@ -36198,7 +36215,7 @@ class HandleRelease {
                 repo: this._context.repo.repo,
                 tag_name: `v${version.version}`,
                 name: `Release v${version.version}`,
-                body: pullRequest.body || '',
+                body: releaseNotes,
                 prerelease: false,
                 target_commitish: this._context.sha
             };
@@ -36206,7 +36223,7 @@ class HandleRelease {
             logging_1.logger.info(release);
             yield octokit.repos.createRelease(release);
             logging_1.logger.info('GitHub release created');
-            yield (0, changeLog_1.prependToChangeLog)(pullRequest.body || '', `v${version.version}`, pullRequest.number, pullRequest.html_url);
+            yield (0, changeLog_1.prependToChangeLog)(releaseNotes, `v${version.version}`, associatedNumber, associatedLink);
             logging_1.logger.info('Prepended to changelog');
         });
     }
@@ -36647,11 +36664,15 @@ const path = (0, core_1.getInput)('path') || 'CHANGELOG.md';
 const userName = (0, core_1.getInput)('user-name', { required: true }) || '';
 const userEmail = (0, core_1.getInput)('user-email', { required: true }) || '';
 const gitHubToken = (0, core_1.getInput)('github-token') || null;
+const version = (0, core_1.getInput)('version') || null;
+const releaseNotes = (0, core_1.getInput)('release-notes') || null;
 exports["default"] = {
     path,
     userName,
     userEmail,
-    gitHubToken
+    gitHubToken,
+    version,
+    releaseNotes
 };
 
 

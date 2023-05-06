@@ -18,6 +18,14 @@ inputs:
     description: "GitHub token to use within the action when it is performing writing. Defaults to the GITHUB_TOKEN."
     required: false
     default: ${{ github.token }}
+  version:
+    description: "Version number to use when creating the release. If there is a value and the value is not an empty string, it will override the logic of deducting the version number based on tags on the PR."
+    required: false
+    default: ""
+  release-notes:
+    description: "Release notes to use when creating the release."
+    required: false
+    default: ""
 
 outputs:
   should-publish:

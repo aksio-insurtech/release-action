@@ -32218,11 +32218,15 @@ const path = (0, core_1.getInput)('path') || 'CHANGELOG.md';
 const userName = (0, core_1.getInput)('user-name', { required: true }) || '';
 const userEmail = (0, core_1.getInput)('user-email', { required: true }) || '';
 const gitHubToken = (0, core_1.getInput)('github-token') || null;
+const version = (0, core_1.getInput)('version') || null;
+const releaseNotes = (0, core_1.getInput)('release-notes') || null;
 exports["default"] = {
     path,
     userName,
     userEmail,
-    gitHubToken
+    gitHubToken,
+    version,
+    releaseNotes
 };
 
 
